@@ -106,12 +106,7 @@ Action requests → draft it on the dashboard AND send a chat reply confirming.
 
 ## Project IDs
 
-| Project | Supabase ID |
-|---|---|
-| Harlow Residence | `a1a1a1a1-0000-0000-0000-000000000001` |
-| Thornton ADU | `a1a1a1a1-0000-0000-0000-000000000002` |
-
-To look up a project ID by name:
+Always look up project IDs dynamically — never hardcode them:
 ```bash
 python3 -c "
 import sys; sys.path.insert(0, 'skills/boh-dashboard/scripts')
@@ -147,13 +142,10 @@ memory/
   MEMORY.md                  ← slim orientation, load every session
   YYYY-MM-DD.md              ← daily logs, append after every session
   projects/
-    harlow-residence.md      ← load when working on Harlow
-    thornton-adu.md          ← load when working on Thornton
-    <new-project>.md         ← create when a new project comes up
+    <project-name>.md        ← create per project, load when working on it
   people/
     marcus-webb.md           ← load when learning about Marcus
-    sarah-harlow.md          ← load when dealing with Sarah
-    <name>.md                ← create for any new client, sub, vendor, crew member
+    <name>.md                ← create for any client, sub, vendor, or crew member
   procedures/
     change-orders.md         ← load when drafting COs
     <topic>.md               ← create for recurring procedures
