@@ -34,3 +34,7 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 
 _Daily logs: memory/YYYY-MM-DD.md_
 _Last updated: 2026-03-21_
+- [2026-03-21] Marcus prefers client-facing schedule updates as emails staged for approval, not just chat responses.
+- [2026-03-21] Sutton Deck Addition active as of March 18 — demo & site prep in progress
+- [2026-03-23] Morrison Kitchen is active lead (2.5K, Apr 14). 3 expired COIs flagged: Hartmann, Pro Tile, Apex. Harlow not in active graph.
+- [2026-03-23] TODO 2026-03-30: Remind Marcus to order blinds — Harlow Residence

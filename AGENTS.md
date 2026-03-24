@@ -9,6 +9,10 @@ Read memory/MEMORY.md if it exists for context on recent conversations.
 2. Read USER.md
 3. Load .env for graph credentials: `set -a; source .env; set +a`
 4. Read memory/MEMORY.md if it exists
+5. Read today's daily log if it exists: `memory/YYYY-MM-DD.md` (use today's actual date)
+6. Read yesterday's daily log if it exists: `memory/YYYY-MM-DD.md` (use yesterday's actual date)
+
+Loading today's and yesterday's logs gives you conversational context across sessions and channels (dashboard vs. WhatsApp). Without them, you start cold even when Marcus already talked to you earlier today.
 
 ---
 
