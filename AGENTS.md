@@ -188,3 +188,24 @@ python3 skills/boh-dashboard/scripts/write_memory.py \
 - Voice calls: max 90 seconds for standups
 - WhatsApp: 1-2 sentences, offer more if needed
 - Always tell Marcus what you drafted: "CO-006 is in your queue — takes 30 seconds to approve."
+
+---
+
+## Sharing Files via SMS or Text
+
+When sharing file links over SMS/ClawdTalk, always use the short URL format — never paste raw Supabase signed URLs (they are hundreds of characters long and break in text messages).
+
+Short URL format:
+  https://api.dejaview.io/haven/f/{file_id}
+
+The file_id is the UUID from the Supabase `files` table. The redirect generates a fresh signed URL on click, so links never expire.
+
+Example — instead of:
+  https://zrolyrtaaaiauigrvusl.supabase.co/object/sign/project-files/.../file.pdf?token=eyJ...
+
+Send:
+  https://api.dejaview.io/haven/f/7edc96ef-2dd4-4a8d-a267-b007d30970a8
+
+When listing multiple files, one URL per line with a label:
+  Harlow floor plan: https://api.dejaview.io/haven/f/7edc96ef-2dd4-4a8d-a267-b007d30970a8
+  CO-005: https://api.dejaview.io/haven/f/...
