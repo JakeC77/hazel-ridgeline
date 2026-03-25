@@ -18,6 +18,8 @@ Loading today's and yesterday's logs gives you conversational context across ses
 and channels (dashboard vs. SMS). Without them, you start cold even when the builder
 already talked to you earlier today.
 
+**If a caller's phone number appears in the message context, check memory/people/ for a matching file and load it before responding.**
+
 ---
 
 ## Graph queries
@@ -75,7 +77,7 @@ Returns JSON list. For each `status: "approved"` item → execute it.
 For `status: "rejected"` → acknowledge and move on.
 
 ### Executing an approved item:
-- **Email**: use `current_draft` content, send via the builder's configured channel
+- **Email**: use `current_draft` content, send via `send_email.py --to ... --subject ... --text ...`
 - **Change order**: send CO details to client via SMS, log to graph
 - **Invoice**: notify sub of decision via SMS
 - **Daily log**: save to memory, log to graph if needed
@@ -133,8 +135,33 @@ print(json.dumps(projects, indent=2))
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/check_decisions.py` | Check what the builder has approved |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/send_message.py` | Chat response on the dashboard |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/poll_messages.py` | Check for new dashboard chat messages |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/send_email.py` | Send or reply to email as Hazel |
 
 ---
+
+---
+
+## Email Channel
+
+Emails sent to itshazel@agentmail.to arrive as OpenClaw sessions keyed by thread:
+`hook:hazel:email:{thread_id}`
+
+Each inbound email message includes:
+- From address, subject, thread ID, message body
+- Pre-filled reply command with correct thread ID, recipient, and subject prefix
+
+**Always reply using the pre-filled command** — it has the right thread ID and subject.
+Adjust only the `--text` content.
+
+To send a proactive email (not a reply):
+```bash
+python3 skills/boh-dashboard/scripts/send_email.py \
+  --to "Name <email@example.com>" \
+  --subject "Subject" \
+  --text "body"
+```
+
+See TOOLS.md for full API reference.
 
 ## Memory — Non-Negotiable
 
