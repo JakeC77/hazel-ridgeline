@@ -59,12 +59,31 @@ STORAGE_HEADERS = {
 
 # ── Supabase helpers ───────────────────────────────────────────────────────────
 
+MIGRATION_SQL = "ALTER TABLE files ADD COLUMN IF NOT EXISTS converted_path TEXT;"
+
+
+def check_schema():
+    """Verify converted_path column exists. Raises RuntimeError with migration SQL if not."""
+    try:
+        SB.get("files", params={"select": "converted_path", "limit": "1"})
+    except Exception as exc:
+        if "converted_path" in str(exc):
+            raise RuntimeError(
+                "DB schema migration required — 'converted_path' column missing.\n"
+                "Run the following in the Supabase SQL editor "
+                "(https://supabase.com/dashboard/project/zrolyrtaaaiauigrvusl/sql):\n\n"
+                f"  {MIGRATION_SQL}\n\n"
+                "Then retry heic_convert.py."
+            )
+        raise
+
+
 def fetch_pending_files():
     """Return list of files needing HEIC conversion."""
     rows = SB.get(
         "files",
         params={
-            "select": "id,project_id,name,storage_path,category",
+            "select": "id,project_id,name,storage_path,category,converted_path",
             "archived": "eq.false",
             "converted_path": "is.null",
             "storage_path": "not.is.null",
@@ -170,6 +189,7 @@ def process_file(row: dict) -> bool:
 
 def run_once() -> tuple:
     """Process all pending HEIC files. Returns (success_count, fail_count)."""
+    check_schema()
     pending = fetch_pending_files()
     if not pending:
         log.info("No HEIC files pending conversion.")
