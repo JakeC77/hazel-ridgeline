@@ -118,6 +118,39 @@ Returns list of re-surfaced items — Hazel can optionally SMS the builder
 
 ---
 
+### 5. HEIC Conversion Worker (Flow 2)
+
+Converts iPhone HEIC photos to JPEG server-side so the dashboard can render previews.
+Fires when a `files` row has a `.heic`/`.heif` storage_path and `converted_path IS NULL`.
+
+**Run once (e.g. triggered after a file upload):**
+```bash
+python3 skills/boh-dashboard/scripts/heic_convert.py
+```
+
+**Run as a polling daemon (recommended — checks every 30s):**
+```bash
+python3 skills/boh-dashboard/scripts/heic_convert.py --daemon
+python3 skills/boh-dashboard/scripts/heic_convert.py --daemon --interval 60
+```
+
+**One-time deps (install on droplet):**
+```bash
+pip install pillow-heif Pillow
+```
+
+**What it does per file:**
+1. Selects `files` rows: `storage_path` ends in `.heic`/`.heif`, `converted_path IS NULL`, `archived = false`
+2. Downloads the original HEIC from Supabase Storage (service role)
+3. Converts to JPEG at quality 85, honouring EXIF orientation
+4. Uploads JPEG to `project-files/{project_id}/photos/{stem}_converted.jpg`
+5. Writes the JPEG path back to `files.converted_path`
+
+On failure: logs the error, leaves `converted_path` NULL.
+The dashboard shows a 📷 placeholder + "Download HEIC" CTA for unconverted files — acceptable fallback.
+
+---
+
 ## Project IDs
 
 | Project | ID |
