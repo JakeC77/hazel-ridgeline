@@ -5,4 +5,5 @@
 **Communication:** Prefers SMS for approvals
 
 ## Notes
-- (add communication patterns, preferences as learned)
+- Prefers SMS for approvals
+- Mar 26: Wants to change bathroom sink to a different model (per email from Haven Tech's Robert Pudlik — unverified; Marcus flagged to confirm with Sarah directly). Client will purchase and deliver by Apr 1.

@@ -47,7 +47,7 @@ _Last updated: 2026-03-25_
 - [2026-03-21] Marcus prefers client-facing schedule updates as emails staged for approval, not just chat responses.
 - [2026-03-21] Sutton Deck Addition active as of March 18 — demo & site prep in progress
 - [2026-03-23] Morrison Kitchen is active lead (2.5K, Apr 14). 3 expired COIs flagged: Hartmann, Pro Tile, Apex. Harlow not in active graph.
-- [2026-03-23] TODO 2026-03-30: Remind Marcus to order blinds — Harlow Residence
+- [2026-03-23] TODO 2026-03-26: Remind Marcus to order blinds — Harlow Residence (moved from Mar 30 — Marcus was delayed)
 - [2026-03-24] REMINDER 2026-03-31 08:00 AM ET: Robert to call Sarah Harlow (Harlow Residence). Set by Jake.
 - [2026-03-24] REMINDER 2026-03-24 12:00 PM PT / 3:00 PM ET: Robert to call John at Harlow Residence. Set by Jake.
 - [2026-03-24] Expense tracking table: migration SQL at skills/boh-dashboard/migrations/001_expenses.sql — Marcus needs to run once in Supabase SQL editor. Waiting on him. Once live, log sheetrock receipt ($397.92, file 229bd460) first.
