@@ -54,3 +54,4 @@ _Last updated: 2026-03-25_
 - [2026-03-24] Expenses table NOT YET CREATED — Marcus needs to run skills/boh-dashboard/migrations/001_expenses.sql in Supabase SQL Editor (2026-03-24)
 - [2026-03-24] Woodlawn ADU new project created on dashboard (Supabase ID: e12b4913-ef9f-4932-8452-49da6280245c). Awaiting client name, contract value, address, timeline, subs from Marcus.
 - [2026-03-25] Haven Tech team (Robert Pudlik robert@, JR john@haventechsolutions.com) now have Hazel's email: itshazel@agentmail.to. NOTE: Robert Pudlik at Haven Tech ≠ Robert Pudlik the Ridgeline client.
+- [2026-03-30] Standup placed. Morrison Kitchen $17,575 invoice 3 days overdue (due Mar 27). $9,400 in bills past due. Pinnacle Countertop COI expires Mar 31 (tomorrow — critical). Hartmann Plumbing, Pro Tile & Stone, Apex Electrical COIs already expired.
