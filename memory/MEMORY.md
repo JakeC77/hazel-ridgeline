@@ -55,3 +55,4 @@ _Last updated: 2026-03-25_
 - [2026-03-24] Woodlawn ADU new project created on dashboard (Supabase ID: e12b4913-ef9f-4932-8452-49da6280245c). Awaiting client name, contract value, address, timeline, subs from Marcus.
 - [2026-03-25] Haven Tech team (Robert Pudlik robert@, JR john@haventechsolutions.com) now have Hazel's email: itshazel@agentmail.to. NOTE: Robert Pudlik at Haven Tech ≠ Robert Pudlik the Ridgeline client.
 - [2026-03-30] Standup placed. Morrison Kitchen $17,575 invoice 3 days overdue (due Mar 27). $9,400 in bills past due. Pinnacle Countertop COI expires Mar 31 (tomorrow — critical). Hartmann Plumbing, Pro Tile & Stone, Apex Electrical COIs already expired.
+- [2026-04-01] Standup placed. Graph still down (Neo4j DNS, 3rd day). Morrison invoice $17,575 now 5 days past due. $9,400 bills overdue. $2,800 materials due Apr 4. Pinnacle COI expired Mar 31 — must not be on site.
