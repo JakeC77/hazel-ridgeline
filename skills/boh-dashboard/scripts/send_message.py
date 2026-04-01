@@ -31,12 +31,23 @@ def main():
                     f = files[0]
                     attachments.append({"file_id": f["id"], "name": f["name"], "type": f["file_type"]})
 
+    # Look up firm_id so realtime RLS delivers to the right firm
+    firm_id = None
+    try:
+        projects = SB.get("projects", {"id": f"eq.{args.project_id}", "select": "firm_id"})
+        if projects and projects[0].get("firm_id"):
+            firm_id = projects[0]["firm_id"]
+    except Exception:
+        pass
+
     row = {
         "project_id": args.project_id,
         "role": "hazel",
         "content": args.message,
         "attachments": attachments,
     }
+    if firm_id:
+        row["firm_id"] = firm_id
 
     result = SB.insert("messages", row)
     item = result[0] if isinstance(result, list) else result

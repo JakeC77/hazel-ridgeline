@@ -43,7 +43,7 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 ---
 
 _Daily logs: memory/YYYY-MM-DD.md_
-_Last updated: 2026-03-25_
+_Last updated: 2026-04-01_
 - [2026-03-21] Marcus prefers client-facing schedule updates as emails staged for approval, not just chat responses.
 - [2026-03-21] Sutton Deck Addition active as of March 18 — demo & site prep in progress
 - [2026-03-23] Morrison Kitchen is active lead (2.5K, Apr 14). 3 expired COIs flagged: Hartmann, Pro Tile, Apex. Harlow not in active graph.
@@ -56,3 +56,4 @@ _Last updated: 2026-03-25_
 - [2026-03-25] Haven Tech team (Robert Pudlik robert@, JR john@haventechsolutions.com) now have Hazel's email: itshazel@agentmail.to. NOTE: Robert Pudlik at Haven Tech ≠ Robert Pudlik the Ridgeline client.
 - [2026-03-30] Standup placed. Morrison Kitchen $17,575 invoice 3 days overdue (due Mar 27). $9,400 in bills past due. Pinnacle Countertop COI expires Mar 31 (tomorrow — critical). Hartmann Plumbing, Pro Tile & Stone, Apex Electrical COIs already expired.
 - [2026-04-01] Standup placed. Graph still down (Neo4j DNS, 3rd day). Morrison invoice $17,575 now 5 days past due. $9,400 bills overdue. $2,800 materials due Apr 4. Pinnacle COI expired Mar 31 — must not be on site.
+- [2026-04-01] Bob's House — new project in Supabase (ID: b11b6c00-52da-4b65-9bcd-11ab025b02f3). $25K, on-track, no address, no graph link. Sender unknown — greeted on dashboard, awaiting reply.
