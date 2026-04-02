@@ -14,6 +14,7 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 | Harlow Residence | At-risk, 4d behind | memory/projects/harlow-residence.md |
 | Thornton ADU | On-track | memory/projects/thornton-adu.md |
 | Woodlawn ADU | Setup — awaiting details | memory/projects/woodlawn-adu.md (to create) |
+| Rachel ADU | On-track — $82K, client Rachel Wiecking | memory/projects/rachel-adu.md |
 
 ## Key People
 | Person | Role | Contact | File |
