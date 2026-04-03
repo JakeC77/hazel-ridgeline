@@ -58,3 +58,5 @@ _Last updated: 2026-04-01_
 - [2026-03-30] Standup placed. Morrison Kitchen $17,575 invoice 3 days overdue (due Mar 27). $9,400 in bills past due. Pinnacle Countertop COI expires Mar 31 (tomorrow — critical). Hartmann Plumbing, Pro Tile & Stone, Apex Electrical COIs already expired.
 - [2026-04-01] Standup placed. Graph still down (Neo4j DNS, 3rd day). Morrison invoice $17,575 now 5 days past due. $9,400 bills overdue. $2,800 materials due Apr 4. Pinnacle COI expired Mar 31 — must not be on site.
 - [2026-04-01] Bob's House — new project in Supabase (ID: b11b6c00-52da-4b65-9bcd-11ab025b02f3). $25K, on-track, no address, no graph link. Sender unknown — greeted on dashboard, awaiting reply.
+- [2026-04-03] Rachel ADU confirmed: start Apr 6, completion Jul 15, $82K. Client: Rachel Wiecking (646-708-3335 / rwiecking@gmail.com). Subs TBD — Marcus to provide today.
+- [2026-04-03] Standup placed (day 5 graph down). Morrison invoice $17,575 now 7 days past due. $2,800 bill due Sat Apr 4. Rachel ADU starts Mon — subs still needed. 4 vendors with expired COIs.
