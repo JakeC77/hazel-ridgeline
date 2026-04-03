@@ -45,10 +45,17 @@
 | **Total** | | **$82,000** |
 
 ## Timeline
-- (not recorded — start/end dates TBD)
+- Start: April 6, 2026
+- Target completion: July 15, 2026
+- Duration: ~14 weeks
+
+## Client Contact
+- Rachel Wiecking
+- Phone: 646-708-3335
+- Email: rwiecking@gmail.com
 
 ## Subs
-- (not recorded)
+- (TBD — Marcus to provide; electrical, plumbing, HVAC, framing needed)
 
 ## Files
 - Contract and SOW: file id 4d28a9ff-a19b-4170-abbc-9ef445e04f89
@@ -59,3 +66,4 @@
 - Contract/SOW and Document Checklist uploaded Apr 3, 2026
 - **CLARIFIED Apr 3, 2026:** This is a *separate* project from the Pudlik Residence (Supabase e12b4913). Both are at 823 NE Liberty St, Portland, OR 97211. Robert John Pudlik is the property owner (main house project, $85K). Rachel Wiecking is the client for this ADU project ($82K). Different contracts, different Supabase IDs, same address.
 - No graph record linked as of Apr 3, 2026
+- Apr 3, 2026: Marcus confirmed start Apr 6, completion Jul 15. Rachel contact: 646-708-3335 / rwiecking@gmail.com. Subs TBD.
