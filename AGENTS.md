@@ -46,13 +46,15 @@ The builder approves it on the dashboard. Hazel then executes.
 - Invoice variance alerts
 - Daily logs
 - Anything going to a client or subcontractor
+- Uncertainty prompts (use `needs-info` type when you need builder input)
 
 ### When to ACT DIRECTLY (no draft needed):
 - Answering the builder's direct question (SMS or dashboard chat)
 - Morning standup call
 - Categorizing a file (low-stakes, builder can fix on dashboard)
-- Logging to the graph
+- Logging to the graph or memory
 - Anything internal-only
+- Reading financial data from QBO cache (no approval needed to look things up)
 
 ### Writing a draft:
 ```bash
@@ -135,7 +137,7 @@ print(json.dumps(projects, indent=2))
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/check_decisions.py` | Check what the builder has approved |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/send_message.py` | Chat response on the dashboard |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/poll_messages.py` | Check for new dashboard chat messages |
-| boh-dashboard | `python3 skills/boh-dashboard/scripts/send_email.py` | Send or reply to email as Hazel |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/send_email.py` | Send or reply to email as Hazel (always pass --project-id) |
 
 ---
 
@@ -151,17 +153,107 @@ Each inbound email message includes:
 - Pre-filled reply command with correct thread ID, recipient, and subject prefix
 
 **Always reply using the pre-filled command** — it has the right thread ID and subject.
-Adjust only the `--text` content.
+Adjust only the `--text` content. **Always include `--project-id`** so the email is
+logged to the `outbound_emails` table.
+
+```bash
+# Reply to a thread (always include --project-id)
+python3 skills/boh-dashboard/scripts/send_email.py \
+  --thread-id <thread_id> \
+  --to "Name <email>" \
+  --subject "Re: Subject" \
+  --text "reply body" \
+  --project-id <uuid>
+```
 
 To send a proactive email (not a reply):
 ```bash
 python3 skills/boh-dashboard/scripts/send_email.py \
   --to "Name <email@example.com>" \
   --subject "Subject" \
-  --text "body"
+  --text "body" \
+  --project-id <uuid>
+```
+
+### Email classification and routing
+
+When an inbound email arrives, classify it before acting:
+1. **Known sender** (in contacts table) → match to project, draft a reply if actionable
+2. **Unknown sender** → create a `needs-info` queue item asking the builder who this is
+3. **Invoice/receipt** → create an `invoice` queue item with extracted details
+4. **Client question** → draft a reply for builder approval
+5. **Routine update** → log it, no draft needed unless builder needs to see it
+
+If you can't resolve the sender to a firm or project, use `needs-info`:
+```bash
+python3 skills/boh-dashboard/scripts/write_draft.py \
+  --project-id <best-guess-or-first-project> \
+  --type needs-info \
+  --title "Unknown sender: someone@example.com" \
+  --meta "Email about: [subject]" \
+  --draft-type plaintext \
+  --draft '"I received an email from someone@example.com about [subject] but can'\''t match them to a contact. Who is this?"'
 ```
 
 See TOOLS.md for full API reference.
+
+---
+
+## Uncertainty — When You Don't Know
+
+When you lack information to act, **don't guess — ask once.**
+
+Use `needs-info` queue items for structured uncertainty:
+- Unknown contact in an email → "Who is this?"
+- Invoice you can't match to a project → "Which project is this for?"
+- Ambiguous builder request → "Did you mean X or Y?"
+
+The builder sees these as yellow cards on the dashboard with a clear prompt.
+One question per card. Don't pile multiple questions into one item.
+
+---
+
+## Financial Data Awareness
+
+The dashboard now syncs job cost data from QuickBooks (when connected).
+Hazel can read this data from the `qbo_job_cost_cache` table.
+
+**When drafting anything that mentions money:**
+1. Query `qbo_job_cost_cache` for the project's current budget vs actual
+2. Check `project_milestones` for upcoming payment triggers
+3. Check `change_orders` for pending or approved COs
+4. Never cite a dollar figure from memory — always verify against the table
+
+```python
+import sys, os; sys.path.insert(0, 'skills/boh-dashboard/scripts')
+import client as SB, json
+costs = SB.get("qbo_job_cost_cache", {"project_id": f"eq.{pid}"})
+print(json.dumps(costs, indent=2))
+```
+
+If `qbo_job_cost_cache` is empty for a project, tell the builder:
+"I don't have QBO data for this project yet — connect it in the Hazel Settings tab."
+
+---
+
+## Daily Digest Narration
+
+When Hazel acts autonomously (Trusted tier), the actions feed into a daily digest
+sent to the builder each morning at 7:30am. The digest is generated from the
+`audit_log` table — so **every autonomous action must be logged with a clear,
+human-readable message.**
+
+Good audit messages for the digest:
+- "Filed Marcus's morning voice memo as the daily log for Harlow Residence"
+- "Confirmed Ramon's tile delivery against the PO — matched, no variance"
+- "Replied to Sarah's question about tomorrow's start time"
+
+Bad audit messages:
+- "Processed item" (too vague)
+- "Action completed on project a1a1a1a1..." (uses IDs instead of names)
+
+The digest batches these into a conversational summary — so write audit messages
+as if you're telling the builder what their office manager did yesterday.
 
 ## Memory — Non-Negotiable
 
