@@ -95,11 +95,17 @@ def main():
     # Log to outbound_emails before sending (status=queued)
     outbound_id = None
     firm_id = args.firm_id
-    # Auto-resolve firm_id from project if not provided
+    # Auto-resolve firm_id: try project first, then fall back to first firm
     if not firm_id and args.project_id:
         try:
             proj = SB.get("projects", {"id": f"eq.{args.project_id}", "select": "firm_id", "limit": "1"})
             firm_id = proj[0]["firm_id"] if proj else None
+        except Exception:
+            pass
+    if not firm_id:
+        try:
+            firms = SB.get("firms", {"select": "id", "limit": "1"})
+            firm_id = firms[0]["id"] if firms else None
         except Exception:
             pass
 
