@@ -52,6 +52,19 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
 | `email` | Client updates, sub notifications, weekly summaries |
 | `invoice` | Invoice review requests, variance alerts |
 | `daily-log` | End-of-day project logs |
+| `needs-info` | When Hazel needs builder input to proceed (unknown contact, ambiguous data, missing info) |
+
+**`needs-info` usage:** When you encounter uncertainty — an unknown sender, a contact you can't match, an invoice you can't assign to a project — create a `needs-info` queue item instead of guessing. The builder sees it as a yellow card on the dashboard.
+
+```bash
+python3 skills/boh-dashboard/scripts/write_draft.py \
+  --project-id <uuid> \
+  --type needs-info \
+  --title "Unknown sender: tyler@example.com" \
+  --meta "Received email but can't match to a contact" \
+  --draft-type plaintext \
+  --draft '"I received an email from tyler@example.com but don'\''t recognize this contact. Who is this? I'\''ll add them to your contacts."'
+```
 
 **Draft formats:**
 - `plaintext`: `--draft '"Email body text here"'` (JSON string)
@@ -210,6 +223,45 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
   --meta "To: sarah.harlow@email.com" \
   --draft-type plaintext \
   --draft '"Hi Sarah,\n\nQuick update on the Harlow Residence...\n\nBest,\nMarcus"'
+```
+
+---
+
+## 6. Send Email (with logging)
+```bash
+python3 skills/boh-dashboard/scripts/send_email.py \
+  --to "Sarah Harlow <sarah@example.com>" \
+  --subject "Weekly update — Harlow Residence" \
+  --text "Hi Sarah, ..." \
+  --project-id <uuid> \
+  --queue-item-id <uuid>   # if triggered by an approved queue item
+```
+
+Always pass `--project-id` so the email is logged to the `outbound_emails` table.
+The script auto-resolves `firm_id` from the project. For replies, include `--thread-id`.
+
+---
+
+## Supabase Tables Hazel Can Read
+
+Beyond the core tables (queue_items, files, messages, audit_log), Hazel has access to:
+
+| Table | Purpose | When to use |
+|---|---|---|
+| `inbound_emails` | Log of all emails received | Check if an email was already processed, review classification |
+| `outbound_emails` | Log of all emails sent | Verify send status, avoid duplicate sends |
+| `qbo_job_cost_cache` | Budget vs actual by cost code | When builder asks about financials or when drafting status updates |
+| `invoices` | AP invoices (from subs/vendors) | Invoice processing, variance checking |
+| `change_orders` | All COs with status | When drafting COs or referencing prior COs |
+| `project_milestones` | Payment and schedule milestones | When checking what's due, drafting AR invoices |
+| `contacts` | Sub/vendor/client directory | Look up contact info, resolve unknown senders |
+
+### Reading financial data for drafts
+When drafting a status update, change order, or any communication that includes financial figures:
+```python
+# Always verify against current data — never use figures from memory
+costs = SB.get("qbo_job_cost_cache", {"project_id": f"eq.{pid}", "order": "cost_code_name"})
+milestones = SB.get("project_milestones", {"project_id": f"eq.{pid}", "order": "due_date.asc.nullslast"})
 ```
 
 ---
