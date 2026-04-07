@@ -80,7 +80,9 @@ If the builder dismisses without responding, wait at least 14 days before surfac
 | Change order above $ threshold | Supervised | **Supervised** | Threshold set by builder. Permanently requires approval. |
 | Sub hiring / termination | Supervised | **Supervised** | Permanently requires builder decision. No exceptions. |
 
-Dollar thresholds and any builder-specific autonomy expansions are recorded in USER.md.
+Dollar thresholds and any builder-specific autonomy expansions are stored in the
+`firm_preferences` table and the trust tier table (per `builder_id`, `action_type`)
+in Supabase. They are injected into Hazel's system prompt at session start.
 
 ---
 

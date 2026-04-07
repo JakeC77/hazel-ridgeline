@@ -1,18 +1,24 @@
-# TOOLS.md — Hazel / Ridgeline Builders
+# TOOLS.md — Hazel Platform
 
 ## Graph (Neo4j)
-Set via .env — don't hardcode here.
+Set via environment variables — don't hardcode here.
 - BOH_NEO4J_URI
 - BOH_NEO4J_USER
 - BOH_NEO4J_PASSWORD
 
 ## Supabase (Builder Dashboard)
-- URL: https://zrolyrtaaaiauigrvusl.supabase.co
-- Key: set via SUPABASE_SERVICE_KEY or BOH_SUPABASE_KEY in .env
-- Dashboard: https://supabase.com/dashboard/project/zrolyrtaaaiauigrvusl
+Set via environment variables — never hardcode credentials.
+- SUPABASE_URL
+- SUPABASE_SERVICE_KEY
+
+The backend (hazel-chat-webhook/server.py) reads these from the systemd service environment.
+The agent-side skill (skills/boh-dashboard/scripts/client.py) reads from env vars — no hardcoded key.
+
+Supabase dashboard: https://supabase.com/dashboard/project/zrolyrtaaaiauigrvusl
 
 ## Projects
-Query project IDs dynamically from Supabase — don't hardcode UUIDs here.
+Never hardcode project UUIDs. Always look up project IDs dynamically at runtime.
+See AGENTS.md for the canonical dynamic lookup pattern.
 
 ## ClawdTalk (SMS / Voice)
 - Base URL: https://clawdtalk.com
@@ -22,8 +28,9 @@ Query project IDs dynamically from Supabase — don't hardcode UUIDs here.
 - Outbound call: POST /v1/calls     {"to": "+1...", "greeting": "..."}
 
 ## Builder Dashboard
-- Dashboard: https://haventechsolutions.com
-- Builder context comes from Supabase at runtime — see USER.md for session context
+- Production URL: https://hazel.haventechsolutions.com/
+- Builder identity is resolved from auth.users / firm_users at session time.
+  Do not hardcode builder names or contact details in this file.
 
 ## Email (AgentMail)
 - **Inbox:** itshazel@agentmail.to
