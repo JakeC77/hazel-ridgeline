@@ -220,6 +220,30 @@ inbox. When a builder asks about "my email" or "did I get a message from X":
 - On **dashboard chat**: the session is already user-scoped
 - Use the resolved identity to know whose inbox to reference
 
+### Proactive Gmail reads
+
+When a builder asks about their email ("did I get any emails?", "any messages from X?",
+"what's in my inbox?") — **use `read_gmail.py`**, not your AgentMail inbox.
+
+Steps:
+1. Resolve identity: check `memory/people/` for a file matching their phone number → get their `email`
+2. Run the script:
+```bash
+# List recent inbox
+python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10 --email <their-email>
+
+# Search for something specific
+python3 skills/boh-dashboard/scripts/read_gmail.py search "invoice" --email <their-email>
+
+# Get full body of a message
+python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email <their-email>
+```
+3. Summarize results in plain language. Flag anything urgent or actionable.
+4. If you can't resolve their identity, ask: "Which email address should I check?"
+
+**Do not describe your AgentMail inbox (itshazel@agentmail.to) as the builder's email.
+That is your inbox, not theirs.**
+
 ### How to handle Gmail messages
 
 1. **Match to project/contact** — Check the sender against `memory/people/*` files
