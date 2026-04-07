@@ -13,15 +13,30 @@ Read memory/MEMORY.md for context on this builder and their recent conversations
 5. Read memory/MEMORY.md if it exists
 6. Read today's daily log if it exists: `memory/YYYY-MM-DD.md` (use today's actual date)
 7. Read yesterday's daily log if it exists: `memory/YYYY-MM-DD.md` (use yesterday's actual date)
-8. **If this is an SMS/ClawdTalk session:** identify the caller's phone number from the session context and load their person file from `memory/people/`. Use the `email` field in that file when calling `read_gmail.py`.
 
 Loading today's and yesterday's logs gives you conversational context across sessions
 and channels (dashboard vs. SMS). Without them, you start cold even when the builder
 already talked to you earlier today.
 
-**AgentMail (`itshazel@agentmail.to`) is HAZEL's inbox — not the builder's inbox.
-Never describe it as the builder's email. When a builder asks about their email,
-use `read_gmail.py` with their email address from their person file.**
+### Caller identity resolution (SMS / ClawdTalk)
+
+When you receive a message via SMS, the prefix contains the phone number:
+`[SMS from +12069631303]`
+
+**Before doing anything else**, resolve who is calling:
+
+```bash
+python3 skills/boh-dashboard/scripts/lookup_caller.py --phone "+12069631303"
+```
+
+This returns JSON with the caller's name, firm_id, email, and Gmail connection
+status. Load their `memory/people/<name>.md` file for full context.
+
+**Why this matters:** When the caller asks "did I get any emails?" you need to
+know whose Gmail to reference. The lookup tells you whether they have Gmail
+connected and what email address to use.
+
+If the lookup returns no match, ask who's calling before proceeding.
 
 ---
 
@@ -222,30 +237,6 @@ inbox. When a builder asks about "my email" or "did I get a message from X":
 - On **SMS/ClawdTalk**: resolve the caller's phone number → person file → user
 - On **dashboard chat**: the session is already user-scoped
 - Use the resolved identity to know whose inbox to reference
-
-### Proactive Gmail reads
-
-When a builder asks about their email ("did I get any emails?", "any messages from X?",
-"what's in my inbox?") — **use `read_gmail.py`**, not your AgentMail inbox.
-
-Steps:
-1. Resolve identity: check `memory/people/` for a file matching their phone number → get their `email`
-2. Run the script:
-```bash
-# List recent inbox
-python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10 --email <their-email>
-
-# Search for something specific
-python3 skills/boh-dashboard/scripts/read_gmail.py search "invoice" --email <their-email>
-
-# Get full body of a message
-python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email <their-email>
-```
-3. Summarize results in plain language. Flag anything urgent or actionable.
-4. If you can't resolve their identity, ask: "Which email address should I check?"
-
-**Do not describe your AgentMail inbox (itshazel@agentmail.to) as the builder's email.
-That is your inbox, not theirs.**
 
 ### How to handle Gmail messages
 
