@@ -242,6 +242,33 @@ The script auto-resolves `firm_id` from the project. For replies, include `--thr
 
 ---
 
+## 7. Read Gmail Inbox
+
+Use this to proactively read Jake's Gmail inbox on demand — listing recent messages,
+searching for specific emails, or fetching full message content.
+
+```bash
+# List recent inbox messages (default 10)
+python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10
+
+# Search inbox
+python3 skills/boh-dashboard/scripts/read_gmail.py search "invoice from:subcontractor"
+python3 skills/boh-dashboard/scripts/read_gmail.py search "Harlow" --max 5
+
+# Get full body of a specific message
+python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id>
+```
+
+Use this when:
+- Builder asks "what's in my email?" or "do I have any emails about X?"
+- You need to find details in an email (invoice amounts, dates, names)
+- Following up on an inbound push you already received
+- Checking if a sent reply was received
+
+**Note:** Reads Jake's Gmail inbox (`jake@haventechsolutions.com`), not Hazel's AgentMail. Tokens auto-refresh from Supabase.
+
+---
+
 ## Supabase Tables Hazel Can Read
 
 Beyond the core tables (queue_items, files, messages, audit_log), Hazel has access to:
