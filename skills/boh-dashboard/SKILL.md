@@ -248,16 +248,23 @@ Use this to proactively read Jake's Gmail inbox on demand — listing recent mes
 searching for specific emails, or fetching full message content.
 
 ```bash
-# List recent inbox messages (default 10)
-python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10
+# List recent inbox (tokens are per-user — always pass --email or --user-id)
+python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10 --email jake@haventechsolutions.com
+python3 skills/boh-dashboard/scripts/read_gmail.py list --max 10 --user-id <uuid>
 
 # Search inbox
-python3 skills/boh-dashboard/scripts/read_gmail.py search "invoice from:subcontractor"
-python3 skills/boh-dashboard/scripts/read_gmail.py search "Harlow" --max 5
+python3 skills/boh-dashboard/scripts/read_gmail.py search "invoice from:subcontractor" --email jake@haventechsolutions.com
+python3 skills/boh-dashboard/scripts/read_gmail.py search "Harlow" --max 5 --email jake@haventechsolutions.com
 
 # Get full body of a specific message
-python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id>
+python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email jake@haventechsolutions.com
 ```
+
+**Identity resolution — always pass `--email` or `--user-id`:**
+- Gmail tokens are per-user. Multiple team members can each connect their own inbox.
+- On SMS/ClawdTalk: resolve caller phone → memory/people/ file → their email
+- On dashboard chat: session is user-scoped; use the email from the inbound push session key (`hook:hazel:gmail:{firm_id}:{user_id}`)
+- If you can't resolve identity, ask: "Which email address should I check?"
 
 Use this when:
 - Builder asks "what's in my email?" or "do I have any emails about X?"
@@ -265,7 +272,7 @@ Use this when:
 - Following up on an inbound push you already received
 - Checking if a sent reply was received
 
-**Note:** Reads Jake's Gmail inbox (`jake@haventechsolutions.com`), not Hazel's AgentMail. Tokens auto-refresh from Supabase.
+**Note:** Reads the connected Gmail inbox, not Hazel's AgentMail. Tokens auto-refresh from Supabase.
 
 ---
 

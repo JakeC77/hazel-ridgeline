@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-read_gmail.py — Read Jake's Gmail inbox on behalf of Hazel
+read_gmail.py — Read a user's Gmail inbox on behalf of Hazel
 
 Usage:
-  python3 read_gmail.py list [--max 10] [--query "from:someone"]
-  python3 read_gmail.py get <message_id>
-  python3 read_gmail.py search "invoice OR bid" [--max 10]
+  python3 read_gmail.py list [--max 10] [--query "from:someone"] [--user-id <uuid>] [--email <addr>]
+  python3 read_gmail.py get <message_id> [--user-id <uuid>] [--email <addr>]
+  python3 read_gmail.py search "invoice OR bid" [--max 10] [--user-id <uuid>] [--email <addr>]
 
 Reads from gmail_tokens table using stored OAuth token.
+Tokens are per-user — pass --user-id or --email to identify which inbox.
+Falls back to first available token if neither is specified.
 """
 import argparse, base64, json, os, sys, requests
 from datetime import datetime, timezone, timedelta
@@ -16,12 +18,8 @@ SUPABASE_URL = "https://zrolyrtaaaiauigrvusl.supabase.co"
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 GMAIL_CLIENT_ID     = os.getenv("GMAIL_CLIENT_ID", "")
 GMAIL_CLIENT_SECRET = os.getenv("GMAIL_CLIENT_SECRET", "")
-FIRM_ID = None  # resolved at runtime
 
-SB = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": f"Bearer {SUPABASE_KEY}",
-}
+SB = {}  # populated after env load
 
 
 def decode_token(ciphertext):
@@ -30,22 +28,32 @@ def decode_token(ciphertext):
     try:
         return base64.b64decode(ciphertext.encode()).decode()
     except Exception:
-        return ciphertext  # already plaintext
+        return ciphertext
 
 
 def encode_token(plaintext):
     return base64.b64encode(plaintext.encode()).decode()
 
 
-def get_token_row():
+def get_token_row(user_id=None, email=None):
+    params = {
+        "select": "firm_id,user_id,email,access_token,refresh_token,expiry",
+        "limit": "1",
+    }
+    if user_id:
+        params["user_id"] = f"eq.{user_id}"
+    elif email:
+        params["email"] = f"eq.{email}"
+
     r = requests.get(
         f"{SUPABASE_URL}/rest/v1/gmail_tokens",
         headers=SB,
-        params={"select": "firm_id,access_token,refresh_token,expiry", "limit": "1"},
+        params=params,
         timeout=10,
     )
     if not r.ok or not r.json():
-        print("ERROR: No Gmail token found. Connect Gmail in the dashboard Settings tab.", file=sys.stderr)
+        who = email or user_id or "any user"
+        print(f"ERROR: No Gmail token found for {who}. Connect Gmail in the dashboard Settings tab.", file=sys.stderr)
         sys.exit(1)
     return r.json()[0]
 
@@ -72,18 +80,20 @@ def refresh_access_token(row):
     new_access = tokens["access_token"]
     expires_in = tokens.get("expires_in", 3600)
     new_expiry = (datetime.now(timezone.utc) + timedelta(seconds=expires_in)).isoformat()
+    # Update by email (unique per user) to avoid firm_id ambiguity
+    patch_params = {"email": f"eq.{row['email']}"} if row.get("email") else {"firm_id": f"eq.{row['firm_id']}", "user_id": f"eq.{row['user_id']}"}
     requests.patch(
         f"{SUPABASE_URL}/rest/v1/gmail_tokens",
         headers={**SB, "Content-Type": "application/json"},
-        params={"firm_id": f"eq.{row['firm_id']}"},
+        params=patch_params,
         json={"access_token": encode_token(new_access), "expiry": new_expiry},
         timeout=5,
     )
     return new_access
 
 
-def get_access_token():
-    row = get_token_row()
+def get_access_token(user_id=None, email=None):
+    row = get_token_row(user_id=user_id, email=email)
     expiry_str = row.get("expiry", "")
     try:
         expiry = datetime.fromisoformat(expiry_str)
@@ -97,10 +107,7 @@ def get_access_token():
 
 
 def parse_message(msg):
-    """Extract key fields from a Gmail message object."""
     headers = {h["name"].lower(): h["value"] for h in msg.get("payload", {}).get("headers", [])}
-    body = ""
-    payload = msg.get("payload", {})
 
     def extract_body(part):
         if part.get("mimeType") == "text/plain":
@@ -113,6 +120,7 @@ def parse_message(msg):
                 return result
         return ""
 
+    payload = msg.get("payload", {})
     body = extract_body(payload)
     if not body:
         data = payload.get("body", {}).get("data", "")
@@ -133,11 +141,8 @@ def parse_message(msg):
 
 
 def cmd_list(args):
-    access_token = get_access_token()
-    params = {
-        "maxResults": str(args.max),
-        "labelIds": "INBOX",
-    }
+    access_token = get_access_token(user_id=args.user_id, email=args.email)
+    params = {"maxResults": str(args.max), "labelIds": "INBOX"}
     if args.query:
         params["q"] = args.query
     r = requests.get(
@@ -172,7 +177,7 @@ def cmd_list(args):
 
 
 def cmd_get(args):
-    access_token = get_access_token()
+    access_token = get_access_token(user_id=args.user_id, email=args.email)
     r = requests.get(
         f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{args.message_id}",
         headers={"Authorization": f"Bearer {access_token}"},
@@ -191,9 +196,8 @@ def cmd_get(args):
     print(f"\n--- Body ---\n{parsed['body']}")
 
 
-def main():
-    # Load .env if present
-    env_path = os.path.join(os.path.dirname(__file__), "../../../../../.env")
+def load_env():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../../.env")
     if os.path.exists(env_path):
         with open(env_path) as f:
             for line in f:
@@ -201,13 +205,23 @@ def main():
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
                     os.environ.setdefault(k.strip(), v.strip())
-    # Refresh globals after env load
-    global SUPABASE_KEY, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET
+    global SUPABASE_KEY, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, SB
     SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
     GMAIL_CLIENT_ID = os.getenv("GMAIL_CLIENT_ID", "")
     GMAIL_CLIENT_SECRET = os.getenv("GMAIL_CLIENT_SECRET", "")
-    SB["apikey"] = SUPABASE_KEY
-    SB["Authorization"] = f"Bearer {SUPABASE_KEY}"
+    SB = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+    }
+
+
+def add_identity_args(p):
+    p.add_argument("--user-id", default=None, help="Filter by Supabase user UUID")
+    p.add_argument("--email", default=None, help="Filter by Gmail address (e.g. jake@haventechsolutions.com)")
+
+
+def main():
+    load_env()
 
     p = argparse.ArgumentParser(description="Read Gmail inbox for Hazel")
     sub = p.add_subparsers(dest="cmd")
@@ -215,13 +229,16 @@ def main():
     ls = sub.add_parser("list", help="List inbox messages")
     ls.add_argument("--max", type=int, default=10)
     ls.add_argument("--query", "-q", default="", help="Gmail search query")
+    add_identity_args(ls)
 
     sr = sub.add_parser("search", help="Search inbox")
     sr.add_argument("query", help="Search query")
     sr.add_argument("--max", type=int, default=10)
+    add_identity_args(sr)
 
     gt = sub.add_parser("get", help="Get full message")
     gt.add_argument("message_id")
+    add_identity_args(gt)
 
     args = p.parse_args()
     if not args.cmd:
