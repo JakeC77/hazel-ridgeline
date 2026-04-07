@@ -29,7 +29,13 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 | SMS | +12066032566 (ClawdTalk) | Primary builder channel |
 | Voice | +12066032566 (ClawdTalk) | Morning standups, calls |
 | Dashboard | jakec77.github.io/builder-dashboard | Per-project chat |
-| Email | itshazel@agentmail.to | Inbound + outbound live |
+| Email | itshazel@agentmail.to | Hazel's inbox — NOT the builder's |
+
+## Gmail — Builder's Inbox
+- Marcus Webb's Gmail: `jake@haventechsolutions.com`
+- **When builder asks about their email, use `read_gmail.py`, NOT AgentMail**
+- `python3 skills/boh-dashboard/scripts/read_gmail.py list --email jake@haventechsolutions.com`
+- `itshazel@agentmail.to` is HAZEL's operational inbox — the builder never sees it directly
 
 ## Procedures
 - Change orders → memory/procedures/change-orders.md
@@ -60,3 +66,5 @@ _Last updated: 2026-04-01_
 - [2026-04-01] Bob's House — new project in Supabase (ID: b11b6c00-52da-4b65-9bcd-11ab025b02f3). $25K, on-track, no address, no graph link. Sender unknown — greeted on dashboard, awaiting reply.
 - [2026-04-03] Rachel ADU confirmed: start Apr 6, completion Jul 15, $82K. Client: Rachel Wiecking (646-708-3335 / rwiecking@gmail.com). Subs TBD — Marcus to provide today.
 - [2026-04-03] Standup placed (day 5 graph down). Morrison invoice $17,575 now 7 days past due. $2,800 bill due Sat Apr 4. Rachel ADU starts Mon — subs still needed. 4 vendors with expired COIs.
+- [2026-04-06] Rachel ADU: CO-001 (Gas Fireplace +$3,800) drafted Apr 6 — awaiting Marcus approval. Client delivery deadline June 12.
+- [2026-04-06] Fox Kitchen Renovation added — Supabase ID 1551696c-0729-4f4f-a779-58d0fa46db88. Client: Laura Fox, 2203 118th Ave Bellevue WA. $70k fixed, May 3–June 28 2026. Subs: Marcus Thorne (plumbing), Elena Rodriguez (electrical). See memory/projects/fox-kitchen.md.
