@@ -2,7 +2,10 @@
 
 **Role:** General Contractor / PM
 **Company:** Ridgeline Builders
-**Communication:** WhatsApp primary
+**Phone:** +12069631303
+**Email:** jake@haventechsolutions.com
+**Gmail connected:** yes — use `--email jake@haventechsolutions.com` with read_gmail.py
+**Communication:** SMS/ClawdTalk primary
 **Dashboard:** https://jakec77.github.io/builder-dashboard/
 
 ## Preferences

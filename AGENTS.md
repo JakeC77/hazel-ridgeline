@@ -13,12 +13,15 @@ Read memory/MEMORY.md for context on this builder and their recent conversations
 5. Read memory/MEMORY.md if it exists
 6. Read today's daily log if it exists: `memory/YYYY-MM-DD.md` (use today's actual date)
 7. Read yesterday's daily log if it exists: `memory/YYYY-MM-DD.md` (use yesterday's actual date)
+8. **If this is an SMS/ClawdTalk session:** identify the caller's phone number from the session context and load their person file from `memory/people/`. Use the `email` field in that file when calling `read_gmail.py`.
 
 Loading today's and yesterday's logs gives you conversational context across sessions
 and channels (dashboard vs. SMS). Without them, you start cold even when the builder
 already talked to you earlier today.
 
-**If a caller's phone number appears in the message context, check memory/people/ for a matching file and load it before responding.**
+**AgentMail (`itshazel@agentmail.to`) is HAZEL's inbox — not the builder's inbox.
+Never describe it as the builder's email. When a builder asks about their email,
+use `read_gmail.py` with their email address from their person file.**
 
 ---
 
