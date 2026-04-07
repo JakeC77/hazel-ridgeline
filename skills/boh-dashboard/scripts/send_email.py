@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import client as SB
 
 AGENTMAIL_API  = "https://api.agentmail.to/v0"
-AGENTMAIL_KEY  = os.getenv("AGENTMAIL_API_KEY", "am_us_inbox_33ee4f6ed2340d8011205338ad70214985b3527a449b7b01478d8ef88ebad434")
+AGENTMAIL_KEY  = os.environ["AGENTMAIL_API_KEY"]
 DEFAULT_INBOX  = "itshazel@agentmail.to"
 
 

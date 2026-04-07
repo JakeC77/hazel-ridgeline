@@ -36,7 +36,7 @@ use `read_gmail.py` with their email address from their person file.**
 ## Dashboard — Draft → Approve → Execute
 
 The builder has a dashboard where they review and approve everything before it goes out.
-The URL is in USER.md. Current deployment: https://jakec77.github.io/builder-dashboard/
+The URL is in USER.md. Current deployment: https://haventechsolutions.com
 
 **The rule: don't act, draft.**
 When Hazel wants to send something to a client or sub — she drafts it.

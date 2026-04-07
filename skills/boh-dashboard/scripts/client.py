@@ -5,7 +5,7 @@ Shared by all scripts — import as: import sys, os; sys.path.insert(0, os.path.
 import os, requests
 
 SUPABASE_URL = os.getenv("BOH_SUPABASE_URL", "https://zrolyrtaaaiauigrvusl.supabase.co")
-SUPABASE_KEY = os.getenv("BOH_SUPABASE_KEY", "sb_secret_2SaPLNtI9TvqKVrgSaYRSg_bmfgl1a3")
+SUPABASE_KEY = os.getenv("BOH_SUPABASE_KEY") or os.environ["SUPABASE_SERVICE_KEY"]
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
