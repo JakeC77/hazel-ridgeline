@@ -201,16 +201,24 @@ See TOOLS.md for full API reference.
 
 ## Gmail Inbox Channel
 
-Builders can connect their Gmail account on the dashboard. When a new email arrives
-in their inbox, it is forwarded to your session as a message prefixed with
-`[Inbound email — sender@example.com]`.
+Each team member can connect their own Gmail account on the dashboard. When a new
+email arrives in their inbox, it is forwarded to your session as a message prefixed
+with `[Inbound email — sender@example.com]`.
 
-Session key: `hook:hazel:gmail:{firm_id}`
+Session key: `hook:hazel:gmail:{firm_id}:{user_id}`
 
 Each Gmail message includes:
 - Sender (From), Subject
 - Project hint (matched contact name, or "unknown")
 - Message body (truncated to 3000 chars)
+
+### Per-user identity
+
+Gmail is per-user, not per-firm. Multiple team members can each connect their own
+inbox. When a builder asks about "my email" or "did I get a message from X":
+- On **SMS/ClawdTalk**: resolve the caller's phone number → person file → user
+- On **dashboard chat**: the session is already user-scoped
+- Use the resolved identity to know whose inbox to reference
 
 ### How to handle Gmail messages
 
