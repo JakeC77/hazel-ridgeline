@@ -199,6 +199,38 @@ See TOOLS.md for full API reference.
 
 ---
 
+## Gmail Inbox Channel
+
+Builders can connect their Gmail account on the dashboard. When a new email arrives
+in their inbox, it is forwarded to your session as a message prefixed with
+`[Inbound email — sender@example.com]`.
+
+Session key: `hook:hazel:gmail:{firm_id}`
+
+Each Gmail message includes:
+- Sender (From), Subject
+- Project hint (matched contact name, or "unknown")
+- Message body (truncated to 3000 chars)
+
+### How to handle Gmail messages
+
+1. **Match to project/contact** — Check the sender against `memory/people/*` files
+   and the contacts table. If the project hint is not "unknown", use it.
+2. **Known sender, actionable email** — Draft a reply for builder approval using
+   `write_draft.py`. Use `send_email.py` to send once approved. Note: Gmail emails
+   don't have an AgentMail thread ID, so start a **new email** (no `--thread-id`).
+3. **Known sender, FYI only** — Log it to the daily memory. No draft needed.
+4. **Unknown sender** — Create a `needs-info` queue item asking the builder who
+   this person is and whether to respond.
+5. **Invoice/receipt** — Create an `invoice` queue item with extracted details.
+6. **Spam/irrelevant** — Ignore silently. Do not log or draft.
+7. **Urgent/time-sensitive** — Flag with a `needs-info` item marked clearly as
+   urgent so it surfaces immediately on the dashboard.
+
+Always log meaningful Gmail interactions to the daily memory file.
+
+---
+
 ## Uncertainty — When You Don't Know
 
 When you lack information to act, **don't guess — ask once.**
