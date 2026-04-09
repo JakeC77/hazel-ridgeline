@@ -75,6 +75,20 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
 After writing, notify the builder via their preferred channel:
 "Drafted [title] — check your dashboard to approve."
 
+### Email drafts (structured format):
+When drafting an email (`--type email`), **always use `--draft-type structured`** with JSON:
+```bash
+python3 skills/boh-dashboard/scripts/write_draft.py \
+  --project-id <uuid> \
+  --type email \
+  --title "Email to Sarah — kitchen timeline" \
+  --meta "To: Sarah Harlow" \
+  --draft-type structured \
+  --draft '{"to": "Sarah Harlow <sarah@example.com>", "subject": "Kitchen renovation timeline", "body": "Hi Sarah, ...", "cc": "", "in_reply_to": ""}'
+```
+When the builder approves, the email is **automatically sent from their Gmail** (if connected).
+You do NOT send emails directly — you only draft. The approval flow handles delivery.
+
 ### Checking for approvals:
 ```bash
 python3 skills/boh-dashboard/scripts/check_decisions.py \
@@ -85,7 +99,9 @@ Returns JSON list. For each `status: "approved"` item → execute it.
 For `status: "rejected"` → acknowledge and move on.
 
 ### Executing an approved item:
-- **Email**: use `current_draft` content, send via the builder's configured channel
+- **Email**: automatically sent via Gmail when approved (if builder has Gmail connected).
+  You do NOT need to call `send_email.py` for approved email drafts — the server handles it.
+  Only confirm to the builder: "Done — email sent to [recipient]."
 - **Change order**: send CO details to client via SMS, log to graph
 - **Invoice**: notify sub of decision via SMS
 - **Daily log**: write to audit_log, log to graph if needed
