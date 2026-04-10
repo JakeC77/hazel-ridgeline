@@ -58,3 +58,17 @@ python3 skills/boh-dashboard/scripts/send_email.py \
 Emails to itshazel@agentmail.to fire a webhook → hazel-chat-webhook shim → OpenClaw.
 Each thread gets its own session key: `hook:hazel:email:{thread_id}`
 The inbound message includes From, Subject, Thread ID, body, and pre-filled reply command.
+
+## Punch List
+Write punch list items to a project:
+```bash
+python3 skills/boh-dashboard/scripts/write_punch_list.py \
+  --project-id <uuid> \
+  --items '[{"description": "Issue description", "trade": "Tile", "location": "master bath"}]' \
+  --source voice|sms|photo|dashboard_text \
+  [--source-file-id <uuid>]
+```
+- `--items`: JSON array of items, each with `description` (required), `trade` (optional), `location` (optional)
+- `--source`: how the items were reported
+- Batch insert — pass multiple items in one call
+- See AGENTS.md "Punch List Capture" section for trade keyword map and confirmation flow
