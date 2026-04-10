@@ -16,11 +16,54 @@ Draft format:
   plaintext:  --draft '"Email body text here"'
   structured: --draft '{"fields": [{"label": "Amount", "value": "$4,800"}]}'
 
+Email drafts (--type email) MUST use structured format with:
+  --draft '{"to": "Name <email@example.com>", "subject": "...", "body": "..."}'
+  The "to" field MUST contain valid email addresses.
+  Multiple recipients: "Name <a@b.com>, Other <c@d.com>"
+
 Outputs: JSON with the created queue_item row (includes id).
 """
-import sys, os, json, argparse
+import sys, os, json, argparse, re
 sys.path.insert(0, os.path.dirname(__file__))
 import client as SB
+
+EMAIL_REGEX = re.compile(r'[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}')
+
+
+def validate_email_draft(draft):
+    """Validate that an email draft has required fields with valid email addresses.
+    Returns (ok, error_message)."""
+    if not isinstance(draft, dict):
+        return False, (
+            "Email drafts must be structured JSON with: to, subject, body.\n"
+            'Example: --draft \'{"to": "Name <email@example.com>", "subject": "...", "body": "..."}\''
+        )
+
+    to = draft.get("to", "")
+    subject = draft.get("subject", "")
+    body = draft.get("body", "")
+
+    errors = []
+
+    if not to:
+        errors.append('"to" field is required and must contain an email address.')
+    elif not EMAIL_REGEX.search(to):
+        errors.append(
+            f'"to" field must contain a valid email address. Got: "{to}"\n'
+            'Use format: "Name <email@example.com>" or just "email@example.com"'
+        )
+
+    if not subject:
+        errors.append('"subject" field is required.')
+
+    if not body:
+        errors.append('"body" field is required.')
+
+    if errors:
+        return False, "Email draft validation failed:\n- " + "\n- ".join(errors)
+
+    return True, ""
+
 
 def main():
     p = argparse.ArgumentParser()
@@ -35,6 +78,13 @@ def main():
     args = p.parse_args()
 
     draft = json.loads(args.draft)
+
+    # Validate email drafts
+    if args.type == "email":
+        ok, err = validate_email_draft(draft)
+        if not ok:
+            print(json.dumps({"error": err}), file=sys.stderr)
+            sys.exit(1)
 
     row = {
         "project_id": args.project_id,
