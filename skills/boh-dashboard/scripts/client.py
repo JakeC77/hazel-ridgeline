@@ -4,8 +4,30 @@ Shared by all scripts — import as: import sys, os; sys.path.insert(0, os.path.
 """
 import os, requests
 
+# Auto-load .env from workspace if env vars aren't set (e.g. inside sandbox)
+def _load_dotenv():
+    """Walk up from this script's directory to find and load a .env file."""
+    d = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(10):
+        env_path = os.path.join(d, ".env")
+        if os.path.isfile(env_path):
+            with open(env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, val = line.split("=", 1)
+                        os.environ.setdefault(key.strip(), val.strip().strip('"'))
+            return
+        parent = os.path.dirname(d)
+        if parent == d:
+            break
+        d = parent
+
+if not os.getenv("BOH_SUPABASE_KEY") and not os.getenv("SUPABASE_SERVICE_KEY"):
+    _load_dotenv()
+
 SUPABASE_URL = os.getenv("BOH_SUPABASE_URL", "https://zrolyrtaaaiauigrvusl.supabase.co")
-SUPABASE_KEY = os.getenv("BOH_SUPABASE_KEY") or os.environ["SUPABASE_SERVICE_KEY"]
+SUPABASE_KEY = os.getenv("BOH_SUPABASE_KEY") or os.environ.get("SUPABASE_SERVICE_KEY", "")
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
