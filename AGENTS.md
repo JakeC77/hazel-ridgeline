@@ -314,6 +314,64 @@ python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email <the
 
 ---
 
+## Punch List Capture
+
+When a builder reports job site issues — through voice, SMS, photo, or dashboard
+chat — capture them as structured punch list items.
+
+### Detection
+Enter punch list mode when the builder says: "punch list", "log these issues",
+"snag list", "fix list", or describes multiple defects to capture.
+
+### Parsing
+Break the input into discrete items. For each, extract:
+- **description** — what the issue is
+- **assigned_trade** — infer from keywords (see map below)
+- **location** — where in the building, if mentioned
+
+### Trade keyword map
+```
+tile/grout/thinset → Tile
+paint/primer/drywall → Painting
+cabinet/drawer/hinge → Cabinetry
+outlet/switch/wire/panel → Electrical
+pipe/faucet/drain/toilet → Plumbing
+door/frame/trim/casing → Finish Carpentry
+roof/gutter/flashing → Roofing
+hvac/duct/furnace/ac → HVAC
+window/glass/glazing → Windows
+concrete/foundation/slab → Concrete
+landscape/grade/drain → Landscaping
+```
+
+### Confirmation (required before writing)
+Always present parsed items to the builder before writing:
+```
+I found 3 items:
+1. Tile grout cracking — Tile — master bath
+2. Paint touch-up needed — Painting — hallway
+3. Cabinet door misaligned — Cabinetry — kitchen
+
+Write these to the punch list?
+```
+
+### Writing
+On confirmation:
+```bash
+python3 skills/boh-dashboard/scripts/write_punch_list.py \
+  --project-id <uuid> \
+  --items '[{"description": "Tile grout cracking", "trade": "Tile", "location": "master bath"}, ...]' \
+  --source voice|sms|photo|dashboard_text
+```
+
+For photos, add `--source-file-id <uuid>` with the uploaded file ID.
+
+### Sub notification
+After writing, ask: "Want me to draft a note to [trade] about these items?"
+If yes, create an email draft via `write_draft.py --type email` for builder approval.
+
+---
+
 ## Uncertainty — When You Don't Know
 
 When you lack information to act, **don't guess — ask once.**
