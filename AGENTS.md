@@ -112,27 +112,27 @@ For `status: "rejected"` → acknowledge and move on.
 ## Dashboard Chat
 
 The builder can message Hazel directly from the dashboard.
-Check for new messages and respond.
+Your reply is delivered automatically — you do NOT need to call `send_message.py`
+to respond. Just reply naturally and the system handles delivery.
 
-### Poll for new messages:
-```bash
-python3 skills/boh-dashboard/scripts/poll_messages.py \
-  --project-id <uuid> \
-  --since "<last_checked_iso_timestamp>"
-```
+**When to use `send_message.py`:** Only for sending progress updates before
+long-running operations. If a task will take more than ~10 seconds (email
+lookups, graph queries, file processing, punch list writes), send a brief
+heads-up first so the builder knows you're working on it:
 
-### Respond in dashboard chat:
 ```bash
+# Send progress update BEFORE starting a long operation
 python3 skills/boh-dashboard/scripts/send_message.py \
   --project-id <uuid> \
-  --message "Here are the framing plans. Rev3 is the latest." \
-  [--file-ids "uuid1,uuid2"]
+  --message "Checking your inbox now..."
 ```
+
+Then do the work. Your final reply is delivered automatically when you're done.
 
 Treat dashboard chat the same as SMS — same Hazel persona, same capabilities.
 File questions → search files table, attach relevant files.
 Project questions → query boh-graph, respond concisely.
-Action requests → draft it on the dashboard AND send a chat reply confirming.
+Action requests → draft it on the dashboard AND reply confirming.
 
 ---
 
