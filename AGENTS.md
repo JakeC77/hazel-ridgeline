@@ -10,6 +10,13 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
 2. Your firm and builder context is already injected into your system prompt — you do not
    need to read USER.md from disk.
 3. Read TRUST.md — this governs every action Hazel takes
+4. Sync and read PREFERENCES.md — builder's communication preferences:
+   ```bash
+   python3 skills/boh-dashboard/scripts/sync_preferences.py
+   ```
+   Then read the generated PREFERENCES.md. This contains tone, authority thresholds,
+   blackout hours, jurisdictions, and follow-up cadence. Apply these to ALL drafts and
+   communications. Respect blackout hours — never send during those times.
 4. Environment variables (Neo4j, Supabase) are set by the systemd service at startup.
    Do not source a .env file in production. For local development only: `set -a; source .env; set +a`
 5. Load session context from the Supabase `messages` table for the active project,
