@@ -5,8 +5,13 @@ sync_preferences.py — Fetch firm_preferences from Supabase and write to worksp
 Writes a human-readable PREFERENCES.md file that Hazel reads on startup.
 Run on session start or periodically to keep preferences current.
 
+Multi-tenant: --firm-id is REQUIRED. Running without it would silently pick
+an arbitrary firm in a multi-firm environment and write that firm's preferences
+to disk, where another firm's agent turn could then read them. This is exactly
+the contamination pattern the global-agent rules in CLAUDE.md forbid.
+
 Usage:
-  python3 sync_preferences.py [--output PREFERENCES.md]
+  python3 sync_preferences.py --firm-id <uuid> [--output PREFERENCES.md]
 """
 import sys, os, json, argparse
 sys.path.insert(0, os.path.dirname(__file__))
@@ -71,32 +76,28 @@ def format_preferences(prefs):
 
 def main():
     p = argparse.ArgumentParser()
+    p.add_argument(
+        "--firm-id",
+        required=True,
+        help="Firm UUID to sync preferences for. REQUIRED — do not guess.",
+    )
     p.add_argument("--output", default="PREFERENCES.md", help="Output file path")
     args = p.parse_args()
 
-    # Look up firm_id
-    try:
-        firms = SB.get("firm_users", {"select": "firm_id", "limit": "1"})
-        firm_id = firms[0]["firm_id"] if firms else None
-    except Exception:
-        firm_id = None
+    firm_id = args.firm_id
 
-    if not firm_id:
-        print("Could not determine firm_id", file=sys.stderr)
-        sys.exit(1)
-
-    # Fetch preferences
+    # Fetch preferences scoped to the explicit firm_id. No first-row fallback.
     try:
         prefs_list = SB.get("firm_preferences", {
             "firm_id": f"eq.{firm_id}",
             "limit": "1"
         })
         if not prefs_list:
-            print("No preferences found", file=sys.stderr)
+            print(f"No preferences found for firm_id={firm_id}", file=sys.stderr)
             sys.exit(1)
         prefs = prefs_list[0]
     except Exception as e:
-        print(f"Failed to fetch preferences: {e}", file=sys.stderr)
+        print(f"Failed to fetch preferences for firm_id={firm_id}: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Write to file

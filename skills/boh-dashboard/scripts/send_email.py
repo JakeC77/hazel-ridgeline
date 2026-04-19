@@ -95,7 +95,10 @@ def main():
     # Log to outbound_emails before sending (status=queued)
     outbound_id = None
     firm_id = args.firm_id
-    # Auto-resolve firm_id: try project first, then fall back to first firm
+    # Resolve firm_id strictly: explicit --firm-id wins; otherwise resolve via the
+    # provided --project-id. NO first-row-firms fallback — in a multi-tenant environment
+    # that would silently attribute email to an arbitrary firm. If neither is provided,
+    # the outbound_emails insert is skipped and a warning is logged (see below).
     if not firm_id and args.project_id:
         try:
             proj = SB.get("projects", {"id": f"eq.{args.project_id}", "select": "firm_id", "limit": "1"})
@@ -103,11 +106,11 @@ def main():
         except Exception:
             pass
     if not firm_id:
-        try:
-            firms = SB.get("firms", {"select": "id", "limit": "1"})
-            firm_id = firms[0]["id"] if firms else None
-        except Exception:
-            pass
+        print(
+            "warning: no firm_id provided and could not resolve one via --project-id; "
+            "outbound email will be sent but not logged to outbound_emails",
+            file=sys.stderr,
+        )
 
     if firm_id:
         try:

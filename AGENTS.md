@@ -7,16 +7,14 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
 
 ## On startup
 1. Read SOUL.md
-2. Your firm and builder context is already injected into your system prompt — you do not
-   need to read USER.md from disk.
-3. Read TRUST.md — this governs every action Hazel takes
-4. Sync and read PREFERENCES.md — builder's communication preferences:
-   ```bash
-   python3 skills/boh-dashboard/scripts/sync_preferences.py
-   ```
-   Then read the generated PREFERENCES.md. This contains tone, authority thresholds,
-   blackout hours, jurisdictions, and follow-up cadence. Apply these to ALL drafts and
-   communications. Respect blackout hours — never send during those times.
+2. Read TRUST.md — this governs every action Hazel takes
+3. **Firm + builder + preference context arrives in the `[FIRM CONTEXT]` block prepended to
+   every user message.** Do not read `USER.md` or run `sync_preferences.py` at session start —
+   those are legacy patterns from the single-firm era and will silently pick the wrong firm
+   in a multi-tenant environment. The per-message `[FIRM CONTEXT]` block contains firm name,
+   location, communication tone, authority thresholds, follow-up cadence, and jurisdictions.
+   Apply these to ALL drafts and communications in that turn. Respect blackout hours listed
+   there — never send during those times.
 4. Environment variables (Neo4j, Supabase) are set by the systemd service at startup.
    Do not source a .env file in production. For local development only: `set -a; source .env; set +a`
 5. Load session context from the Supabase `messages` table for the active project,
@@ -27,6 +25,10 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
 7. **If this is an SMS/ClawdTalk session:** identify the caller's phone number from the session
    context and load their person file from `memory/people/`. Use the `email` field in that file
    when calling `read_gmail.py`.
+
+**The `sync_preferences.py` script still exists for ad-hoc use (with `--firm-id`) but is not
+part of session startup.** If you ever find yourself tempted to run it as part of an agent turn,
+stop and re-read step 3 — the context you need is already in the message prefix.
 
 **AgentMail (`itshazel@agentmail.to`) is HAZEL's inbox — not the builder's inbox.**
 **Never describe it as the builder's email. When a builder asks about their email,**
