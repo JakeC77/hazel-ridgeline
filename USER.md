@@ -4,7 +4,6 @@ This file is a template. In production, builder context is injected into Hazel's
 dynamically at session start from the Supabase `firms` and `firm_preferences` tables.
 Do not hardcode firm names, locations, project data, or credentials here.
 
-See `hazel-system-prompt-template.md` Section 2 for how this context is assembled and injected.
 
 ---
 
