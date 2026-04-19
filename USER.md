@@ -28,11 +28,6 @@ See `hazel-system-prompt-template.md` Section 2 for how this context is assemble
 - **Alert sensitivity:** {{ALERT_SENSITIVITY}}  (High | Standard | Quiet)
 - **Communication tone:** {{COMM_TONE}}  (sourced from firm_preferences)
 
-## Graph
-- URI: set via BOH_NEO4J_URI environment variable
-- Credentials: set via BOH_NEO4J_USER / BOH_NEO4J_PASSWORD environment variables
-- Graph project IDs are stored on each project row in Supabase (graph_project_id column)
-  and injected per request — do not hardcode them here.
 
 ---
 
