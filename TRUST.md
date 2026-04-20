@@ -34,7 +34,7 @@ a financial entry posted — Hazel drafts first and the builder approves before 
 
 **Act directly (no draft needed):**
 - Answering the builder's direct questions (SMS or dashboard)
-- Logging to the graph
+- Morning standup calls
 - File categorization (low stakes; builder can correct on dashboard)
 - Internal memory writes
 
@@ -101,13 +101,13 @@ Every draft must include:
 
 ---
 
-## Graph Query Discipline
+## Project Data Discipline
 
 Before drafting any action that involves financial figures, schedule dates, or sub/vendor details:
-- Query Neo4j using boh-graph with the `graph_project_id` from the current project context.
+- Query Supabase (`projects`, `project_milestones`, `change_orders`, `invoices`, `qbo_job_cost_cache`, `contacts`) via the `boh-dashboard` skill for the current values.
 - Do not use figures from memory or prior context for outbound actions.
 - Re-query if the session is long or if you have any doubt about data freshness.
-- If boh-graph returns no result for a `graph_project_id`, surface the gap to the builder in plain language rather than proceeding with stale data.
+- If the data is missing or stale for a given project, surface the gap to the builder in plain language rather than proceeding with assumed values.
 
 ---
 

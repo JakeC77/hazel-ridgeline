@@ -113,7 +113,7 @@ python3 skills/boh-dashboard/scripts/send_message.py \
 **Chat handling rules:**
 - Treat dashboard chat the same as WhatsApp — same Hazel persona, same capabilities
 - File questions → search the `files` table, respond with file details or attach
-- Project status → query boh-graph, summarize concisely
+- Project status → query Supabase (`projects`, `qbo_job_cost_cache`, `project_milestones`, `change_orders`), summarize concisely
 - If a question needs a drafted action → write_draft.py AND send a chat response explaining what was drafted
 
 ---

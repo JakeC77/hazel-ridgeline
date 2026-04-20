@@ -15,9 +15,7 @@ We have built a detailed product requirements document (`haven_trust_ux_requirem
 
 **`CLAUDE.md`** — This file lives in the project root. Claude Code reads it automatically at the start of every session and uses it to govern how it writes code. It defines architectural rules, naming conventions, patterns to follow, and decisions that have already been made. Think of it as standing instructions to the AI assistant doing the development work.
 
-**`ARCHITECTURE.md`** — The system architecture document written by the lead engineer. It defines the full component topology: OpenClaw as the agent runtime, Supabase as the shared data layer, Neo4j as the project knowledge graph, the dashboard frontend, the webhook shim, and the ClawdTalk messaging channel. It also contains the canonical database schema, data flow diagrams, build phase status, and realtime subscription patterns. Read this before touching any data layer code.
-
-**`hazel-system-prompt-template.md`** — This file defines the system prompt that gets sent to the Claude API on every runtime request to Hazel via OpenClaw. It is not a document you read once and forget — it is a template you implement in code, with static sections that never change and dynamic sections you inject from the database at request time. This is where Hazel's behavioral rules live at runtime.
+**`ARCHITECTURE.md`** — The system architecture document written by the lead engineer. It defines the full component topology: OpenClaw as the agent runtime, Supabase as the shared data layer, the dashboard frontend, the webhook shim, and the ClawdTalk messaging channel. It also contains the canonical database schema, data flow diagrams, build phase status, and realtime subscription patterns. Read this before touching any data layer code.
 
 **`behavioral-spec.md`** — This is your primary reference during implementation. It translates the product requirements into data models, decision trees, TypeScript interfaces, and implementation notes. When you hit an ambiguous case, check here first.
 
@@ -25,7 +23,7 @@ We have built a detailed product requirements document (`haven_trust_ux_requirem
 
 ## The System in One Paragraph
 
-Hazel is an AI agent that runs on **OpenClaw** (the agent runtime on a Digital Ocean droplet). Builders interact with Hazel through two channels: **ClawdTalk** (SMS/WhatsApp, phone number +12066032566) and the **browser dashboard** (static HTML/Alpine.js hosted on GitHub Pages). Both channels write to and read from **Supabase**, which is the shared data layer. When Hazel needs project intelligence — schedules, budgets, subs, change order history — it queries a **Neo4j** graph database using Cypher via the `boh-graph` skill. When Hazel needs to interact with the dashboard (write queue drafts, process files, handle chat messages), it uses the `boh-dashboard` skill. The dashboard connects to Supabase directly via the JS client using realtime subscriptions. Dashboard chat messages reach Hazel through a webhook shim (port 8700) that injects project context from Supabase — including the `graph_project_id` Neo4j bridge key — before forwarding to OpenClaw.
+Hazel is an AI agent that runs on **OpenClaw** (the agent runtime on a Digital Ocean droplet). Builders interact with Hazel through two channels: **ClawdTalk** (SMS/voice, phone number +12066032566) and the **browser dashboard** (static HTML/Alpine.js hosted on GitHub Pages). Both channels write to and read from **Supabase**, which is the shared data layer. Project intelligence — schedules, budgets, subs, change order history, invoices — lives in Supabase tables (`projects`, `qbo_job_cost_cache`, `project_milestones`, `change_orders`, `invoices`) and is queried via the `boh-dashboard` skill. When Hazel needs to interact with the dashboard (write queue drafts, process files, handle chat messages), it uses the same `boh-dashboard` skill. The dashboard connects to Supabase directly via the JS client using realtime subscriptions. Dashboard chat messages reach Hazel through the `hazel-plugin` OpenClaw plugin, which enriches each turn with a `[FIRM CONTEXT]` block (firm name, tone, thresholds, jurisdictions) pulled fresh from Supabase per-turn.
 
 ---
 
@@ -48,27 +46,15 @@ Do not change CLAUDE.md to work around a product constraint. If a rule in CLAUDE
 
 Read this before writing any data layer code, any agent integration code, or any webhook code. Key things to pull from it:
 
-**Canonical table names.** The schema in ARCHITECTURE.md defines the exact column names, types, and status/type enum values for every table. Use these exactly — do not invent synonyms. The `queue_items` table uses `status` values `active`, `snoozed`, `approved`, `rejected` and `type` values `change-order`, `email`, `invoice`, `daily-log`. The `projects` table has a `graph_project_id` column that is the bridge to Neo4j.
+**Canonical table names.** The schema in ARCHITECTURE.md defines the exact column names, types, and status/type enum values for every table. Use these exactly — do not invent synonyms. The `queue_items` table uses `status` values `active`, `snoozed`, `approved`, `rejected` and `type` values `change-order`, `email`, `invoice`, `daily-log`.
 
 **Build phase status.** ARCHITECTURE.md has a checklist of what is already done and what is not yet built. Check it before starting any new work to avoid duplicating completed work or building on an assumption that hasn't been wired up yet.
 
 **Realtime subscription patterns.** The dashboard subscribes to `queue_items`, `files`, and `messages` via Supabase Realtime. The patterns are defined in ARCHITECTURE.md. Use them as-is.
 
-**The webhook shim.** Dashboard chat goes through a shim at port 8700 that fetches `project_name`, `pm_name`, and `graph_project_id` from Supabase before forwarding to OpenClaw. If you are touching the chat flow, understand this shim first.
+**The dashboard chat path.** Dashboard chat is handled by the `hazel-plugin` OpenClaw plugin (endpoints `/hazel/chat`, `/hazel/email` on port 18789). The plugin fetches project info and firm context from Supabase on every turn and prepends them to the user message before forwarding to the agent. The Flask backend (`hazel-chat-webhook` on port 8700) is API-only now — no chat forwarding.
 
 **File storage.** Files are stored in the `project-files` Supabase Storage bucket with the path structure `{project_id}/{category}/`. The dashboard uploads directly; Hazel accesses via service role key.
-
-### hazel-system-prompt-template.md
-
-This file has two types of content: static sections and dynamic sections.
-
-The static sections (Identity & North Star, Hard Constraints, Behavioral Instructions) are implemented as string constants in your codebase. They are never assembled from database values or modified at runtime. The Hard Constraints section in particular must be a constant — if you find yourself thinking "I'll make this configurable," stop. Those constraints are product-level guarantees, not settings.
-
-The dynamic sections (Builder Context, Project & Graph Context, Action Context) are assembled at request time by injecting values from the database and the current request. Section 3 (Project & Graph Context) is assembled by the webhook shim before the request is forwarded to OpenClaw — the shim is responsible for fetching `graph_project_id` from Supabase and including it in the message payload.
-
-The `buildSystemPrompt()` function should be a single function that accepts a `HazelRequestContext` object and returns the fully assembled system prompt string. Every call to OpenClaw goes through this function — there should be no direct system prompt construction anywhere else in the codebase.
-
-Include a `system_prompt_version` field in every `audit_log` entry. This lets you correlate historical log entries with the version of the system prompt that governed them, which matters when the prompt evolves.
 
 ### behavioral-spec.md
 
@@ -123,20 +109,19 @@ The goal is not to slow down development. It is to make sure that the decisions 
 ├── TRUST.md                                   ← Trust tier model and hard constraints
 ├── USER.md                                    ← Builder context template (dynamic at runtime)
 ├── TOOLS.md                                   ← Platform-level tool credentials and endpoints
-├── behavioral-spec.md                         ← Your primary implementation reference
-└── hazel-system-prompt-template.md            ← System prompt structure and assembly rules
+└── behavioral-spec.md                         ← Your primary implementation reference
 ```
 
-Note: `behavioral-spec.md` and `hazel-system-prompt-template.md` are at the project root,
-not in a `docs/` subdirectory. If you move them, update all cross-references in CLAUDE.md,
-ARCHITECTURE.md, and engineer-guide.md accordingly.
+Note: `behavioral-spec.md` is at the project root, not in a `docs/` subdirectory.
+If you move it, update all cross-references in CLAUDE.md, ARCHITECTURE.md, and
+engineer-guide.md accordingly.
 
 Source of truth hierarchy when documents conflict:
 
 1. `haven_trust_ux_requirements.docx` — behavioral and product rules
 2. `ARCHITECTURE.md` — system architecture, table names, schema, build status
 3. `behavioral-spec.md` — implementation-level decisions
-4. `CLAUDE.md` / `hazel-system-prompt-template.md` — derived from the above; flag conflicts upward
+4. `CLAUDE.md` — derived from the above; flag conflicts upward
 
 ---
 

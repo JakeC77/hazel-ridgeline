@@ -1,11 +1,5 @@
 # TOOLS.md — Hazel Platform
 
-## Graph (Neo4j)
-Set via environment variables — don't hardcode here.
-- BOH_NEO4J_URI
-- BOH_NEO4J_USER
-- BOH_NEO4J_PASSWORD
-
 ## Supabase (Builder Dashboard)
 Set via environment variables — never hardcode credentials.
 - SUPABASE_URL
