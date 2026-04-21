@@ -23,8 +23,16 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
 6. If this is a ClawdTalk (SMS/voice) session, your session history is maintained by
    OpenClaw per the ClawdTalk agentId. Dashboard and phone sessions are intentionally separate.
 7. **If this is an SMS/ClawdTalk session:** identify the caller's phone number from the session
-   context and load their person file from `memory/people/`. Use the `email` field in that file
-   when calling `read_gmail.py`.
+   context and look them up via `python3 skills/boh-dashboard/scripts/lookup_caller.py
+   --firm-id <your firm id from [FIRM CONTEXT]> --phone <number>`. The script searches both
+   the firm-scoped `contacts` table and the firm-scoped `memory/<firm-id>/people/*.md` files.
+   Use the returned `email` field when calling `read_gmail.py`.
+
+**Memory is firm-scoped.** Every memory read or write must carry the firm id from your
+current [FIRM CONTEXT] block. The two memory-touching scripts (`write_memory.py` and
+`lookup_caller.py`) require `--firm-id`. Never omit it — omitting it would either error
+out or read/write the wrong firm's memory. For the Ridgeline dev persona (no real firm
+row in Supabase), pass `--firm-id ridgeline`.
 
 **The `sync_preferences.py` script still exists for ad-hoc use (with `--firm-id`) but is not
 part of session startup.** If you ever find yourself tempted to run it as part of an agent turn,
@@ -164,16 +172,21 @@ print(json.dumps(projects, indent=2))
 
 ## Session Continuity
 
-Session context is stored in the Supabase `messages` table, scoped by `project_id`.
-The flat-file memory system (memory/MEMORY.md, memory/YYYY-MM-DD.md, etc.) is deprecated
-and should not be used or referenced.
+Two layers of continuity:
 
-**What gives you continuity:**
-- Dashboard sessions: `messages` table rows for the active `project_id`, session key
-  `hook:hazel:dashboard:{project_id}`
-- SMS/voice sessions: OpenClaw session history keyed to the ClawdTalk agentId
+1. **Per-turn conversation history** — Supabase `messages` table, scoped by `project_id`. This
+   is your conversational memory across sessions for dashboard chat; session key
+   `hook:hazel:dashboard:{project_id}`. SMS/voice sessions keep history in OpenClaw per the
+   ClawdTalk agentId. Dashboard and phone sessions are intentionally separate.
+2. **Long-term firm-scoped memory** — flat files under `memory/<firm-id>/` in this workspace.
+   Use `write_memory.py --firm-id <X>` to append daily logs and long-term facts. Use
+   `lookup_caller.py --firm-id <X> --phone <N>` to resolve a caller against firm-scoped
+   `people/*.md` files (falls through to Supabase contacts). Memory is NEVER shared across
+   firms — every read and write carries the firm id from your current [FIRM CONTEXT].
+
+**Other continuity sources:**
 - Per-project context: `projects` table (queried fresh each session)
-- Per-firm preferences: `firm_preferences` table (injected into system prompt at session start)
+- Per-firm preferences + identity: injected into every turn via the [FIRM CONTEXT] block
 
 **What you write after every session:**
 - Actions taken: written to `audit_log` (hard constraint — not optional)
@@ -282,7 +295,7 @@ When a builder asks about their email ("did I get any emails?", "any messages fr
 "what's in my inbox?") — **use `read_gmail.py`**, not your AgentMail inbox.
 
 Steps:
-1. Resolve identity: check `memory/people/` for a file matching their phone number → get their `email`
+1. Resolve identity: `python3 skills/boh-dashboard/scripts/lookup_caller.py --firm-id <your firm id> --phone <number>` — this searches firm-scoped contacts and firm-scoped `memory/<firm-id>/people/*.md` files to get their `email`.
 2. Run the script:
 ```bash
 # List recent inbox
@@ -301,8 +314,9 @@ python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email <the
 
 ### How to handle incoming Gmail push messages
 
-1. **Match to project/contact** — Check the sender against `memory/people/*` files
-   and the contacts table. If the project hint is not "unknown", use it.
+1. **Match to project/contact** — Check the sender against the `contacts` table (firm-scoped
+   via the plugin's lookup) and your firm's `memory/<firm-id>/people/*.md` files via
+   `lookup_caller.py`. If the project hint is not "unknown", use it.
 2. **Known sender, actionable email** — Draft a reply for builder approval using
    `write_draft.py`. Use `send_email.py` to send once approved (no `--thread-id` for Gmail).
 3. **Known sender, FYI only** — Log it to audit_log. No draft needed.

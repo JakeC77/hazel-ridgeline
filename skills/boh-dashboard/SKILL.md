@@ -262,7 +262,7 @@ python3 skills/boh-dashboard/scripts/read_gmail.py get <message_id> --email jake
 
 **Identity resolution — always pass `--email` or `--user-id`:**
 - Gmail tokens are per-user. Multiple team members can each connect their own inbox.
-- On SMS/ClawdTalk: resolve caller phone → memory/people/ file → their email
+- On SMS/ClawdTalk: resolve caller phone via `lookup_caller.py --firm-id <X> --phone <N>` — it searches firm-scoped contacts and `memory/<firm-id>/people/*.md` for the caller's email
 - On dashboard chat: session is user-scoped; use the email from the inbound push session key (`hook:hazel:gmail:{firm_id}:{user_id}`)
 - If you can't resolve identity, ask: "Which email address should I check?"
 

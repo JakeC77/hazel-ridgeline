@@ -2,6 +2,10 @@
 
 _Slim orientation only. Detail lives in subdirectories. Load on demand._
 
+_Paths in this file are **relative to this firm's memory directory**
+(`memory/ridgeline/`). Prepend that prefix when reading them. This keeps
+MEMORY.md portable when a firm's data is migrated or relocated._
+
 ---
 
 ## Builder
@@ -11,17 +15,17 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 ## Active Projects
 | Project | Status | File |
 |---|---|---|
-| Harlow Residence | At-risk, 4d behind | memory/projects/harlow-residence.md |
-| Thornton ADU | On-track | memory/projects/thornton-adu.md |
-| Woodlawn ADU | Setup — awaiting details | memory/projects/woodlawn-adu.md (to create) |
-| Rachel ADU | On-track — $82K, client Rachel Wiecking | memory/projects/rachel-adu.md |
+| Harlow Residence | At-risk, 4d behind | projects/harlow-residence.md |
+| Thornton ADU | On-track | projects/thornton-adu.md |
+| Woodlawn ADU | Setup — awaiting details | projects/woodlawn-adu.md (to create) |
+| Rachel ADU | On-track — $82K, client Rachel Wiecking | projects/rachel-adu.md |
 
 ## Key People
 | Person | Role | Contact | File |
 |---|---|---|---|
-| Marcus Webb | Builder/PM | +12069631303 | memory/people/marcus-webb.md |
-| Sarah Harlow | Client — Harlow Residence | — | memory/people/sarah-harlow.md |
-| Robert Pudlik | Sub (Harlow) + Client (823 Liberty) | +19143209614 | memory/people/robert-pudlik.md |
+| Marcus Webb | Builder/PM | +12069631303 | people/marcus-webb.md |
+| Sarah Harlow | Client — Harlow Residence | — | people/sarah-harlow.md |
+| Robert Pudlik | Sub (Harlow) + Client (823 Liberty) | +19143209614 | people/robert-pudlik.md |
 
 ## Channels
 | Channel | Address / Number | Notes |
@@ -38,7 +42,7 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 - `itshazel@agentmail.to` is HAZEL's operational inbox — the builder never sees it directly
 
 ## Procedures
-- Change orders → memory/procedures/change-orders.md
+- Change orders → procedures/change-orders.md
 
 ## Memory Rules
 - **Load project file** when working on that project
@@ -49,7 +53,7 @@ _Slim orientation only. Detail lives in subdirectories. Load on demand._
 
 ---
 
-_Daily logs: memory/YYYY-MM-DD.md_
+_Daily logs: YYYY-MM-DD.md (in this same directory)_
 _Last updated: 2026-04-01_
 - [2026-03-21] Marcus prefers client-facing schedule updates as emails staged for approval, not just chat responses.
 - [2026-03-21] Sutton Deck Addition active as of March 18 — demo & site prep in progress
@@ -67,4 +71,4 @@ _Last updated: 2026-04-01_
 - [2026-04-03] Rachel ADU confirmed: start Apr 6, completion Jul 15, $82K. Client: Rachel Wiecking (646-708-3335 / rwiecking@gmail.com). Subs TBD — Marcus to provide today.
 - [2026-04-03] Standup placed (day 5 graph down). Morrison invoice $17,575 now 7 days past due. $2,800 bill due Sat Apr 4. Rachel ADU starts Mon — subs still needed. 4 vendors with expired COIs.
 - [2026-04-06] Rachel ADU: CO-001 (Gas Fireplace +$3,800) drafted Apr 6 — awaiting Marcus approval. Client delivery deadline June 12.
-- [2026-04-06] Fox Kitchen Renovation added — Supabase ID 1551696c-0729-4f4f-a779-58d0fa46db88. Client: Laura Fox, 2203 118th Ave Bellevue WA. $70k fixed, May 3–June 28 2026. Subs: Marcus Thorne (plumbing), Elena Rodriguez (electrical). See memory/projects/fox-kitchen.md.
+- [2026-04-06] Fox Kitchen Renovation added — Supabase ID 1551696c-0729-4f4f-a779-58d0fa46db88. Client: Laura Fox, 2203 118th Ave Bellevue WA. $70k fixed, May 3–June 28 2026. Subs: Marcus Thorne (plumbing), Elena Rodriguez (electrical). See projects/fox-kitchen.md.
