@@ -51,6 +51,15 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
    per-caller info (email, person file). Use the returned `email` when calling
    `read_gmail.py`.
 
+   **Voice calls are different — ClawdTalk doesn't pass caller ID today** (upstream
+   fix pending). For inbound voice, the phone-based resolution above doesn't work.
+   Instead, open the call with "Hi, this is Hazel — who am I speaking with, and which
+   contractor are you calling about?" Take the contractor name the caller gives and
+   resolve it via `resolve_firm_by_name.py --name "<what they said>"`. Handle
+   unique/multiple/unmatched as you would on SMS, but conversationally: read back the
+   candidates on "multiple", take a message on "unmatched". Full voice protocol is in
+   the ClawdTalk voiceContext system prompt you already see on voice turns.
+
 **Memory is firm-scoped.** Every memory read or write must carry a firm id. On dashboard
 chat/email, the id comes from the `[FIRM CONTEXT]` block. On SMS/voice, the id comes
 from step A above (`resolve_firm_by_phone.py`). The memory-touching scripts
@@ -186,8 +195,9 @@ print(json.dumps(projects, indent=2))
 
 | Skill | Script | When to use |
 |---|---|---|
-| boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_phone.py` | First call on every SMS/voice turn — resolves caller phone → firm_id |
-| boh-dashboard | `python3 skills/boh-dashboard/scripts/get_firm_context.py` | On SMS/voice after firm is resolved — fetch the [FIRM CONTEXT] block |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_phone.py` | First call on every inbound SMS — resolves caller phone → firm_id |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_name.py` | First call on every inbound voice call (no caller ID) — resolves spoken contractor name → firm_id |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/get_firm_context.py` | After firm is resolved on SMS/voice — fetch the [FIRM CONTEXT] block |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/lookup_caller.py` | Richer caller identity (name, email, person file) — requires --firm-id |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/write_memory.py` | Append to daily log + long-term memory — requires --firm-id |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/write_draft.py` | Stage client-facing action for approval |
