@@ -22,17 +22,41 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
    continuity across sessions — it replaces the flat-file memory system.
 6. If this is a ClawdTalk (SMS/voice) session, your session history is maintained by
    OpenClaw per the ClawdTalk agentId. Dashboard and phone sessions are intentionally separate.
-7. **If this is an SMS/ClawdTalk session:** identify the caller's phone number from the session
-   context and look them up via `python3 skills/boh-dashboard/scripts/lookup_caller.py
-   --firm-id <your firm id from [FIRM CONTEXT]> --phone <number>`. The script searches both
-   the firm-scoped `contacts` table and the firm-scoped `memory/<firm-id>/people/*.md` files.
-   Use the returned `email` field when calling `read_gmail.py`.
+7. **If this is an SMS/ClawdTalk session, you must resolve firm context yourself**
+   before doing anything firm-scoped. SMS arrives without a `[FIRM CONTEXT]` block
+   (that's dashboard/email only), so run these two scripts at the start of every
+   SMS/voice turn:
 
-**Memory is firm-scoped.** Every memory read or write must carry the firm id from your
-current [FIRM CONTEXT] block. The two memory-touching scripts (`write_memory.py` and
-`lookup_caller.py`) require `--firm-id`. Never omit it — omitting it would either error
-out or read/write the wrong firm's memory. For the Ridgeline dev persona (no real firm
-row in Supabase), pass `--firm-id ridgeline`.
+   ```bash
+   # Step A: resolve the caller's firm via cross-firm contact lookup
+   python3 skills/boh-dashboard/scripts/resolve_firm_by_phone.py --phone <from_number>
+   # returns JSON: { "kind": "unique"|"ambiguous"|"unmatched", "firm_id": "...", "name": "...", ... }
+
+   # Step B: if kind == "unique", fetch this firm's context
+   python3 skills/boh-dashboard/scripts/get_firm_context.py --firm-id <firm_id>
+   # prints a [FIRM CONTEXT] block — read it and treat it as authoritative for this turn
+   ```
+
+   Routing rules:
+   - **Unique match** → proceed with the resolved `firm_id` for all subsequent tool
+     calls (lookup_caller, write_memory, write_draft, etc.).
+   - **Ambiguous match** (phone is in multiple firms' contacts) → ask the caller which
+     firm/project they're calling about, or reply "I see your number in a few places —
+     can you tell me which contractor you're calling about?" Do not guess.
+   - **Unmatched** (unknown sender) → reply politely noting you don't recognize the
+     number; don't attempt any firm-scoped action. Log the interaction via audit_log
+     if warranted.
+
+   Once firm is resolved, use `lookup_caller.py --firm-id <X> --phone <N>` for richer
+   per-caller info (email, person file). Use the returned `email` when calling
+   `read_gmail.py`.
+
+**Memory is firm-scoped.** Every memory read or write must carry a firm id. On dashboard
+chat/email, the id comes from the `[FIRM CONTEXT]` block. On SMS/voice, the id comes
+from step A above (`resolve_firm_by_phone.py`). The memory-touching scripts
+(`write_memory.py`, `lookup_caller.py`) require `--firm-id`. Never omit it — omitting
+it would error out or read/write the wrong firm's memory. For the Ridgeline dev persona
+(no real firm row in Supabase), pass `--firm-id ridgeline`.
 
 **The `sync_preferences.py` script still exists for ad-hoc use (with `--firm-id`) but is not
 part of session startup.** If you ever find yourself tempted to run it as part of an agent turn,
@@ -162,6 +186,10 @@ print(json.dumps(projects, indent=2))
 
 | Skill | Script | When to use |
 |---|---|---|
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_phone.py` | First call on every SMS/voice turn — resolves caller phone → firm_id |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/get_firm_context.py` | On SMS/voice after firm is resolved — fetch the [FIRM CONTEXT] block |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/lookup_caller.py` | Richer caller identity (name, email, person file) — requires --firm-id |
+| boh-dashboard | `python3 skills/boh-dashboard/scripts/write_memory.py` | Append to daily log + long-term memory — requires --firm-id |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/write_draft.py` | Stage client-facing action for approval |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/check_decisions.py` | Check what the builder has approved |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/send_message.py` | Chat response on the dashboard |

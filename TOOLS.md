@@ -17,9 +17,15 @@ See AGENTS.md for the canonical dynamic lookup pattern.
 ## ClawdTalk (SMS / Voice)
 - Base URL: https://clawdtalk.com
 - Auth: set via CLAWTALK_API_KEY in .env
-- Hazel's number: +12066032566
+- Hazel's number: +12066032566 (shared across all firms — firm attribution happens via sender phone lookup)
 - Send SMS: POST /v1/messages/send  {"to": "+1...", "message": "..."}
 - Outbound call: POST /v1/calls     {"to": "+1...", "greeting": "..."}
+
+### Inbound SMS — firm resolution is your responsibility
+SMS and voice arrive without a `[FIRM CONTEXT]` block (unlike dashboard/email). On every
+inbound SMS/voice turn, resolve firm first via `resolve_firm_by_phone.py`, then fetch
+firm context via `get_firm_context.py`. See AGENTS.md "On startup" step 7 for the full
+flow, including ambiguous-match and unknown-sender handling.
 
 ## Builder Dashboard
 - Production URL: https://hazel.haventechsolutions.com/
