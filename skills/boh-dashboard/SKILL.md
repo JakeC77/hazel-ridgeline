@@ -36,7 +36,7 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
   --title "CO-006 · Deck Addition — $8,200" \
   --meta "To: Sarah Harlow · $8,200 add" \
   --draft-type structured \
-  --draft '{"fields": [
+  --draft '{"body": "CO-006: Deck addition per client request. Amount: $8,200.00. Payment terms: Net 30. Client approval via SMS to Sarah Harlow.", "fields": [
     {"label": "CO Number", "value": "CO-006"},
     {"label": "Description", "value": "Deck addition per client request"},
     {"label": "Amount", "value": "$8,200.00"},
@@ -68,7 +68,8 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
 
 **Draft formats:**
 - `plaintext`: `--draft '"Email body text here"'` (JSON string)
-- `structured`: `--draft '{"fields": [...], "to": "client@email.com"}'`
+- `structured` (change-order): `--draft '{"body": "Plain-text summary of the CO", "fields": [...]}'` — `body` is required; the dashboard uses it to render the preview and edit view
+- `structured` (email): `--draft '{"to": "client@email.com", "subject": "...", "body": "..."}'`
 
 ---
 
@@ -192,10 +193,13 @@ item = {
   "id": "...",
   "type": "change-order",
   "title": "CO-006 · Deck Addition",
-  "current_draft": {"fields": [
-    {"label": "Amount", "value": "$8,200.00"},
-    {"label": "Client Approval", "value": "SMS to Sarah Harlow (+1 425-555-0191)"}
-  ]},
+  "current_draft": {
+    "body": "CO-006: Deck addition per client request. Amount: $8,200.00. Client approval via SMS to Sarah Harlow.",
+    "fields": [
+      {"label": "Amount", "value": "$8,200.00"},
+      {"label": "Client Approval", "value": "SMS to Sarah Harlow (+1 425-555-0191)"}
+    ]
+  },
   "decided_by": "builder"
 }
 
