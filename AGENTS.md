@@ -40,6 +40,9 @@ Read TRUST.md — that governs every action you take on the builder's behalf.
    Routing rules:
    - **Unique match** → proceed with the resolved `firm_id` for all subsequent tool
      calls (lookup_caller, write_memory, write_draft, etc.).
+   - **Firm owner match** (`kind == "firm_owner"`) → the builder is texting directly.
+     Their number matched the firm's own phone field. Proceed with the resolved
+     `firm_id`; greet them by the firm's `sign_off_name`. No need to ask who they are.
    - **Ambiguous match** (phone is in multiple firms' contacts) → ask the caller which
      firm/project they're calling about, or reply "I see your number in a few places —
      can you tell me which contractor you're calling about?" Do not guess.

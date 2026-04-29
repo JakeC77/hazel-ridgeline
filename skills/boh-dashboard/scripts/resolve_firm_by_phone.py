@@ -11,11 +11,14 @@ firm-scoped.
 
 The output mirrors the plugin's matchEmailGlobally logic:
 
-  unique     — exactly one firm has this phone in contacts. Safe to route.
-  ambiguous  — multiple firms have this phone. Do not guess; ask the caller
-               or route to triage.
-  unmatched  — no contact row. Unknown caller; handle per the unknown-sender
-               rules in AGENTS.md.
+  unique      — exactly one firm has this phone in contacts. Safe to route.
+  firm_owner  — no contact match, but the phone matches a firm's own phone
+                field (i.e. the builder is texting directly). firm_id and
+                user_id (owner) are returned.
+  ambiguous   — multiple firms have this phone. Do not guess; ask the caller
+                or route to triage.
+  unmatched   — no contact row and no firm match. Unknown caller; handle per
+                the unknown-sender rules in AGENTS.md.
 
 Usage:
   python3 resolve_firm_by_phone.py --phone "+12069631303"
@@ -79,7 +82,59 @@ def main():
         sys.exit(1)
 
     if not contacts:
-        print(json.dumps({"kind": "unmatched", "phone_last10": last10}))
+        # Fallback: check firms.phone — this catches builders texting directly,
+        # since auth.users phone fields are empty (email-only signup).
+        try:
+            firms = SB.get(
+                "firms",
+                {
+                    "phone": f"ilike.%{last10}%",
+                    "select": "id,display_name,phone",
+                    "limit": "5",
+                },
+            )
+        except Exception as e:
+            print(json.dumps({"kind": "unmatched", "error": str(e)}), file=sys.stderr)
+            sys.exit(1)
+
+        if not firms:
+            print(json.dumps({"kind": "unmatched", "phone_last10": last10}))
+            return
+
+        if len(firms) > 1:
+            print(
+                json.dumps(
+                    {
+                        "kind": "ambiguous",
+                        "firm_ids": [f["id"] for f in firms],
+                        "phone_last10": last10,
+                        "note": (
+                            "Caller's phone matches multiple firm records directly. "
+                            "Ask the caller which firm they're calling about."
+                        ),
+                    }
+                )
+            )
+            return
+
+        firm = firms[0]
+        # Resolve the owner user_id for the matched firm
+        owner_result = {"kind": "firm_owner", "firm_id": firm["id"], "phone_last10": last10}
+        try:
+            fu = SB.get(
+                "firm_users",
+                {
+                    "firm_id": f"eq.{firm['id']}",
+                    "role": "eq.owner",
+                    "select": "user_id",
+                    "limit": "1",
+                },
+            )
+            if fu:
+                owner_result["user_id"] = fu[0]["user_id"]
+        except Exception:
+            pass
+        print(json.dumps(owner_result, indent=2))
         return
 
     # Distinct firm_ids
