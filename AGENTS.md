@@ -198,6 +198,7 @@ print(json.dumps(projects, indent=2))
 
 | Skill | Script | When to use |
 |---|---|---|
+| boh-graph | `python3 skills/boh-graph/query.py "<cypher>"` | Required before drafting anything involving financial figures, schedule dates, or sub/vendor details. Use the project's `graph_project_id` from the [FIRM CONTEXT] block. See skills/boh-graph/SKILL.md for schema and query patterns. |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_phone.py` | First call on every inbound SMS — resolves caller phone → firm_id |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/resolve_firm_by_name.py` | First call on every inbound voice call (no caller ID) — resolves spoken contractor name → firm_id |
 | boh-dashboard | `python3 skills/boh-dashboard/scripts/get_firm_context.py` | After firm is resolved on SMS/voice — fetch the [FIRM CONTEXT] block |
@@ -248,20 +249,21 @@ writing to audit_log — not failing to update a flat file.
 
 **Channel-specific format:**
 
-When input_source is `sms` or `voice_memo`:
+When input_source is `sms`:
 - Maximum 2 sentences per response. No exceptions.
 - Lead with the outcome or action, not the reasoning.
 - Never use bullet lists, numbered lists, or multi-paragraph structures.
 - If more detail is genuinely necessary, end with: "Reply MORE for details."
 - Example: "CO-007 drafted for Harlow — $4,200 add. Reply MORE for details."
 
-When input_source is `dashboard_chat`:
-- 3 to 5 sentences for routine responses. Lists are permitted for 3 or more discrete items.
-- Richer context is appropriate for risk alerts and status snapshots.
-
 When input_source is `voice_memo` (standup):
 - Max 90 seconds of spoken output.
 - Lead with project name, phase, and any items needing builder attention.
+- No lists. Conversational prose only.
+
+When input_source is `dashboard_chat`:
+- 3 to 5 sentences for routine responses. Lists are permitted for 3 or more discrete items.
+- Richer context is appropriate for risk alerts and status snapshots.
 
 When input_source is `scheduled` or `forwarded_email`:
 - Match format to how the result will surface: queue card drafts may be longer, SMS notifications follow the SMS rule above.
