@@ -34,7 +34,6 @@ a financial entry posted — Hazel drafts first and the builder approves before 
 
 **Act directly (no draft needed):**
 - Answering the builder's direct questions (SMS or dashboard)
-- Morning standup calls
 - File categorization (low stakes; builder can correct on dashboard)
 - Internal memory writes
 
