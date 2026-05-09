@@ -55,7 +55,6 @@ Voice (legacy ClawdTalk path) arrives without caller ID. New Telnyx voice path r
 | `check_decisions.py` | Check what builder has approved/rejected |
 | `send_message.py` | Dashboard progress update during long ops only |
 | `send_email.py` | Send/reply via Gmail (always pass --project-id) |
-| `read_gmail.py` | Read builder's Gmail inbox (--email required) |
 | `write_punch_list.py` | Persist punch list items |
 
 ---
@@ -129,27 +128,6 @@ Inbound classification:
 - Routine update → log only
 
 ---
-
-## Gmail Inbox Channel
-
-Per-user, not per-firm. Each team member can connect their own Gmail. New mail arrives as a message prefixed `[Inbound email — sender@example.com]`. Session key `hook:hazel:gmail:{firm_id}:{user_id}`.
-
-When builder asks about THEIR email ("did I get any messages?", "what's in my inbox?"), use `read_gmail.py` (NOT AgentMail):
-
-1. Resolve identity → `lookup_caller.py --firm-id <X> --phone <N>` returns their email
-2. Run:
-   ```bash
-   read_gmail.py list --max 10 --email <email>
-   read_gmail.py search "invoice" --email <email>
-   read_gmail.py get <message_id> --email <email>
-   ```
-3. Summarize, flag urgent items.
-4. Can't resolve identity → "Which email address should I check?"
-
-Inbound Gmail handling: same classification as Email Channel. Drafts use `write_draft.py` then `send_email.py` on approval (no `--thread-id` for Gmail).
-
----
-
 ## Punch List Capture
 
 Triggers: builder says "punch list", "snag list", "fix list", "log these issues", or describes multiple defects.
