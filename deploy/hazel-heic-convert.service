@@ -1,0 +1,17 @@
+[Unit]
+Description=Hazel HEIC-to-JPEG conversion pass (Trello exLqKUSR) — scans files table for unconverted .heic/.heif rows and uploads JPEG siblings to Supabase Storage
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=openclaw
+WorkingDirectory=/home/openclaw/hazel-ridgeline
+# Optional env files — leading "-" makes systemd ignore missing paths.
+# client.py also auto-walks up looking for .env, but providing it explicitly
+# avoids surprises when systemd runs the script from a tty-less context.
+EnvironmentFile=-/home/openclaw/hazel-ridgeline/.env
+EnvironmentFile=-/home/openclaw/hazel-chat-webhook/.env
+ExecStart=/usr/bin/python3 /home/openclaw/hazel-ridgeline/skills/boh-dashboard/scripts/heic_convert.py
+# Don't let a hung HTTP request from Supabase wedge the timer cycle.
+TimeoutStartSec=180

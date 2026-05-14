@@ -1,0 +1,17 @@
+[Unit]
+Description=Backstop HEIC-to-JPEG sweep — primary path is the file-insert webhook
+
+[Timer]
+# Primary HEIC conversion path is /webhook/file-inserted in hazel-webhiik
+# (converts in ~1-2s after upload). This timer is the backstop that catches
+# rows the webhook missed: server.py was down at insert time, pillow crashed
+# mid-conversion, transient Storage 5xx, files backfilled before the webhook
+# was wired up. 15-minute cadence is plenty for "did something fall through
+# the cracks" without thrashing the API on empty sweeps.
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
