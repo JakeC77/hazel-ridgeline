@@ -56,6 +56,7 @@ Voice (legacy ClawdTalk path) arrives without caller ID. New Telnyx voice path r
 | `send_message.py` | Dashboard progress update during long ops only |
 | `send_email.py` | Send/reply via Gmail (always pass --project-id) |
 | `write_punch_list.py` | Persist punch list items |
+| `fetch_file.py` | Pull a file from Supabase Storage into your sandbox so you can Read its contents (images, PDFs, etc.) |
 
 ---
 
