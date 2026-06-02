@@ -213,6 +213,16 @@ Bad: "Processed item" / "Action completed on project a1a1..."
 
 Write audit messages like you're telling the builder what their office manager did yesterday.
 
+### Daily Digest format
+
+Opening paragraph: 2 sentences maximum. First sentence states portfolio health in plain terms. Second sentence covers the next most critical cross-project signal, or confirms everything else is on track.
+
+Priority items have two parts only:
+1. One bold action sentence -- verb first, project name, specific action, key number (days, dollars, or age). No chained clauses.
+2. One supporting sentence -- consequence of inaction only, not a restatement of the headline.
+
+Do not add a project label line before the supporting sentence. The project name belongs in the action sentence.
+
 ---
 
 ## Response Style
