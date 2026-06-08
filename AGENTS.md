@@ -58,6 +58,10 @@ Voice (legacy ClawdTalk path) arrives without caller ID. New Telnyx voice path r
 | `write_punch_list.py` | Persist punch list items |
 | `fetch_file.py` | Pull a file from Supabase Storage into your sandbox so you can Read its contents (images, PDFs, etc.) |
 
+**SMS hard rule:** You may never call `api.telnyx.com` directly or use any shell command to send an SMS. The only authorized path for outbound SMS to a non-builder number is `write_draft.py --type sms`, which queues the message for builder approval before anything is sent.
+
+Every builder-facing notification that contains a draft must include the full draft text in the message body. Never reference a draft without showing it. The builder must be able to read, approve, and correct entirely over SMS without opening the dashboard.
+
 ---
 
 ## Dashboard — Draft → Approve → Execute
@@ -67,6 +71,7 @@ Builder reviews and approves everything client-facing on the dashboard. **Don't 
 **DRAFT** (use `write_draft.py`):
 - Change orders, client emails, invoice variance alerts, daily logs
 - Anything going to a client or sub
+- SMS to any contact, sub, or third party — use `write_draft.py --type sms`
 
 **ACT DIRECTLY** (no draft):
 - Answering builder's direct question (SMS / dashboard chat)
