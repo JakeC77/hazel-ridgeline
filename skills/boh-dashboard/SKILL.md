@@ -50,6 +50,7 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
 |---|---|
 | `change-order` | Any scope/cost change to existing contract |
 | `email` | Client updates, sub notifications, weekly summaries |
+| `sms` | **Any outbound text to a contact, sub, vendor, or anyone other than the firm owner.** Required path; you may never call api.telnyx.com directly or use any other shell command to send an SMS. |
 | `invoice` | Invoice review requests, variance alerts |
 | `daily-log` | End-of-day project logs |
 | `needs-info` | When Hazel needs builder input to proceed (unknown contact, ambiguous data, missing info) |
@@ -70,6 +71,42 @@ python3 skills/boh-dashboard/scripts/write_draft.py \
 - `plaintext`: `--draft '"Email body text here"'` (JSON string)
 - `structured` (change-order): `--draft '{"body": "Plain-text summary of the CO", "fields": [...]}'` — `body` is required; the dashboard uses it to render the preview and edit view
 - `structured` (email): `--draft '{"to": "client@email.com", "subject": "...", "body": "..."}'`
+- `structured` (sms): `--draft '{"to": "+15551234567", "body": "Your message here"}'`
+
+**SMS draft prerequisites** (the script will reject otherwise):
+- `to` must normalize to a US E.164 phone number.
+- `to` must match a contact in this firm.
+- That contact must have `sms_consent = true` (carrier compliance + Hazel's safety promise).
+- `body` is ≤ 1400 chars (Telnyx hard cap).
+
+If those don't hold, you do NOT have a path to text that person. Use `--type needs-info` to ask the builder to add the contact / flip the consent flag, and re-draft once they have. There is no alternate send path. Do not try `curl`, `requests.post`, or any other shell command — they will be blocked by the egress firewall and will surface in Sentry as a policy violation.
+
+Example SMS draft:
+```bash
+python3 skills/boh-dashboard/scripts/write_draft.py \
+  --project-id <uuid> \
+  --type sms \
+  --title "Reply to Sarah re: deck timeline" \
+  --meta "To: Sarah Harlow (+1 503-555-0199)" \
+  --draft-type structured \
+  --draft '{"to": "+15035550199", "body": "Hey Sarah — I will be over Thursday at 9am to walk the deck framing with you."}'
+```
+
+Output for SMS drafts includes a `pending_sms` block:
+```json
+{
+  "id": "<queue_item_id>",
+  "type": "sms",
+  ...,
+  "pending_sms": {
+    "id": "<pending_outbound_sms_id>",
+    "short_ref": "A4B7",
+    "to_phone": "+15035550199",
+    "expires_at": "2026-06-09T05:43:53Z"
+  }
+}
+```
+The `short_ref` is what the builder uses to approve via SMS (e.g. they reply `OK #A4B7` to Hazel's approval-request text). The dashboard surfaces it on the card.
 
 ---
 
