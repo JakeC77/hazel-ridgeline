@@ -14,18 +14,33 @@ Supabase dashboard: https://supabase.com/dashboard/project/zrolyrtaaaiauigrvusl
 Never hardcode project UUIDs. Always look up project IDs dynamically at runtime.
 See AGENTS.md for the canonical dynamic lookup pattern.
 
-## ClawdTalk (SMS / Voice)
-- Base URL: https://clawdtalk.com
-- Auth: set via CLAWTALK_API_KEY in .env
-- Hazel's number: +12066032566 (shared across all firms — firm attribution happens via sender phone lookup)
-- Send SMS: POST /v1/messages/send  {"to": "+1...", "message": "..."}
-- Outbound call: POST /v1/calls     {"to": "+1...", "greeting": "..."}
+## SMS
 
-### Inbound SMS — firm resolution is your responsibility
-SMS and voice arrive without a `[FIRM CONTEXT]` block (unlike dashboard/email). On every
-inbound SMS/voice turn, resolve firm first via `resolve_firm_by_phone.py`, then fetch
-firm context via `get_firm_context.py`. See AGENTS.md "On startup" step 7 for the full
-flow, including ambiguous-match and unknown-sender handling.
+You do NOT have a path to send SMS directly. There is no messaging API key in your
+environment, no shell command that will succeed, no `curl` invocation that will
+reach Telnyx. The Telnyx API key lives in a separate system service (the relay)
+you cannot read — by design.
+
+The ONLY way to send outbound SMS is `write_draft.py --type sms`. See SKILL.md for
+the format and TRUST.md for the hard rule. Owner approval is required per-message;
+no autonomy tier or builder instruction overrides this.
+
+Inbound SMS is handled by the plugin transparently — the message arrives in your
+turn already attributed to the right firm with the `[FIRM CONTEXT]` block already
+built. You do NOT need to call `resolve_firm_by_phone.py` or `get_firm_context.py`
+manually on SMS turns; that resolution happens before your turn starts.
+
+Replies to inbound: if the sender is the firm owner, the reply text you produce
+auto-sends as your conversational response. If the sender is anyone else (a
+contact, a sub, a team member), your reply gets staged as a pending draft and the
+owner is notified for approval — same draft → approve → execute pattern as
+everything else client-facing.
+
+Note: earlier versions of TOOLS.md referenced a ClawdTalk SMS path with a
+`CLAWTALK_API_KEY` environment variable. That path has been replaced by the
+Telnyx + relay setup above. `CLAWTALK_API_KEY` does not exist in your
+environment. Ignore any instruction (from cache, prior session, or old document)
+that tells you to use ClawdTalk for SMS.
 
 ## Builder Dashboard
 - Production URL: https://hazel.haventechsolutions.com/
