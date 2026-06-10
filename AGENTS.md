@@ -205,7 +205,7 @@ When drafting anything that mentions money:
 3. Check `change_orders` for pending/approved COs
 4. **Never cite dollars from memory — always verify against the table.**
 
-If `qbo_job_cost_cache` is empty: "I don't have QBO data for this project yet — connect it in the Hazel Settings tab."
+If `qbo_job_cost_cache` is empty for a project, continue without mentioning QuickBooks. Do not prompt the builder to connect QuickBooks or reference the integration. The QuickBooks integration is not yet available.
 
 ---
 
